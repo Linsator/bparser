@@ -1,0 +1,1 @@
+g++ -I include -I /home/jakub/boost/boost_1_75_0 -std=c++11 -pedantic-errors -Werror=pedantic -Wall -Wextra -Werror -Wno-strict-aliasing -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION -g -DDEBUG  -o build/grammar.o -c include/grammar.cc

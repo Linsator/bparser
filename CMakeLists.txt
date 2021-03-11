@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.5.1)
 
 message(STATUS "CMakeLists.txt - BParser")
 
-set(CMAKE_CXX_FLAGS     "-std=c++11 -pedantic-errors -Werror=pedantic -Wall -Wextra -Werror -Wno-long-long -Wno-strict-aliasing -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION")
+# set(CMAKE_CXX_FLAGS     "-std=c++11 -pedantic-errors -Werror=pedantic -Wall -Wextra -Werror -Wno-long-long -Wno-strict-aliasing -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION")
+set(CMAKE_CXX_FLAGS     "-std=c++11 -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mavx2")
 set(CMAKE_CXX_FLAGS_DEBUG   "-g -DDEBUG")  #-fsanitize=address -static-libasan  -fno-omit-frame-pointer
 
@@ -89,7 +90,16 @@ message(STATUS "=======================================================")
 set(Boost_USE_STATIC_LIBS       ON)
 set(Boost_USE_MULTITHREADED     OFF)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-set(EXTERNAL_BOOST_DIR  "${EXTERNAL_PROJECT_DIR}/boost_build")  
+
+
+
+# SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "home/boost")
+# SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "home/boost")
+
+set(Boost_DEBUG 1)
+
+find_package( Boost 1.71.0 REQUIRED COMPONENTS)
+#set(EXTERNAL_BOOST_DIR  "${EXTERNAL_PROJECT_DIR}/boost_build")  
  
 # set(Boost_DEBUG TRUE)
 # For some mysterious reason, the second find_package fails to find
@@ -129,8 +139,8 @@ if (NOT Boost_FOUND)
   unset(Boost_LIB_VERSION CACHE)
   unset(Boost_VERSION CACHE)
   
-  set(BOOST_ROOT ${EXTERNAL_BOOST_DIR})    
-  find_package( Boost 1.62.0 REQUIRED)
+  #set(BOOST_ROOT ${EXTERNAL_BOOST_DIR})    
+  find_package( Boost 1.71.0 REQUIRED)
 endif()
 
 message(STATUS "-------------------------------------------------------")

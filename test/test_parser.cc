@@ -80,11 +80,13 @@ std::vector<double> eval_expr_(std::string expr) {
 
 bool test_expr(std::string expr, std::vector<double> ref_result) {
 	auto res = eval_expr_(expr);
+	std::cout << "res: ";
 
 	// check
 	bool success = true;
 	for(uint i=0; i < vec_size; i++) {
 		for(uint j=0; j < ref_result.size(); j++) {
+			std::cout << fabs(res[j * vec_size + i]) << ", ";
 			if (fabs(res[j * vec_size + i] - ref_result[j]) > 1e-3 * fabs(ref_result[j]) ) {
 				success = false;
 				std::cout << "  " << i << "," << j <<
@@ -93,6 +95,9 @@ bool test_expr(std::string expr, std::vector<double> ref_result) {
 			}
 		}
 	}
+
+	std::cout << "\n";
+
 	std::cout.flush();
 	return success;
 }

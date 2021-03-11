@@ -32,5 +32,14 @@
 *.app
 
 
+
 build
 build/*
+
+#moje
+# VS code
+.vscode
+
+#boost
+boost_build
+include/boost
