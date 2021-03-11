@@ -1,18 +1,11 @@
 /*
- * test_parser_speed.cc
- *
- *  Created on: Feb 2, 2020
- *      Author: jb
- */
-
-
-
-
-/*
  * test_parser.cc
  *
  *  Created on: Jan 11, 2020
  *      Author: jb
+ * 	
+ * 	Further developed by: Linsator & KKSSainz
+ * 	
  */
 
 #include <string>
