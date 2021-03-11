@@ -47,59 +47,6 @@ struct ExprData {
 };
 
 
-
-
-void expr1(ExprData &data) {
-	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
-		for(uint i=0; i<data.vec_size/4; ++i) {
-			uint j = i_comp + 4*data.subset[i];
-			for(uint k = 0; k<4; k++) {
-				double v1 = data.v1[j+k];
-				double v2 = data.v2[j+k];
-				data.vres[j+k] = 3 * v1  + data.cs1 * v2 ;
-			}
-		}
-	}
-}
-
-void expr2(ExprData &data) {
-	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
-		for(uint i=0; i<data.vec_size/4; ++i) {
-			uint j = i_comp + 4*data.subset[i];
-			for(uint k = 0; k<4; k++) {
-				double v1 = data.v1[j+k];
-				data.vres[j+k] =  v1 + 1.1 ;
-			}
-		}
-	}
-}
-
-void expr3(ExprData &data) {
-	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
-		for(uint i=0; i<data.vec_size/4; ++i) {
-			uint j = i_comp + 4*data.subset[i];
-			for(uint k = 0; k<4; k++) {
-				double v1 = data.v1[j+k];
-				data.vres[j+k] = sin(2.2 * v1) ;
-			}
-		}
-	}
-}
-
-void expr4(ExprData &data) {
-	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
-		for(uint i=0; i<data.vec_size/4; ++i) {
-			uint j = i_comp + 4*data.subset[i];
-			for(uint k = 0; k<4; k++) {
-				double v1 = data.v1[j+k];
-				double v2 = data.v2[j+k];
-				data.vres[j+k] = 1 - sin(2.2 * v1) + cos(M_PI / v2);
-			}
-		}
-	}
-}
-
-
 void test_expr(std::string expr, void (*f)(ExprData&)) {
 	using namespace bparser;
 	uint block_size = 1024; // number of floats
@@ -109,7 +56,7 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 1000;
+	uint n_repeats = 10000;
 
 	ArenaAlloc arena_1(32, 10*vec_size *sizeof(double));
 	ExprData data1(arena_1, vec_size);
@@ -124,6 +71,7 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	// Get symbols used in the expressions.
 	std::vector<std::string> variables = p.variables();
 	std::cout << "Symbols: " << print_vector(p.variables()) << "\n";
+
 		not sure if worth it
 	if (std::find(variables.begin(), variables.end(), "cs1") != variables.end())	//if expession contains cs1 sets it
 	{
@@ -195,8 +143,8 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	std::cout << "parser time : " << parser_time << " s \n";
 	std::cout << "c++ time    : " << cpp_time << " s \n";
 	std::cout << "fraction: " << parser_time/cpp_time << "\n";
-	std::cout << "parser avg. time per single executiom (with vector size in mind): " << parser_time/n_repeats/vec_size*1000000000 << " ns \n";
-	std::cout << "c++ avg. time per single executiom (with vector size in mind)   : " << cpp_time/n_repeats/vec_size*1000000000 << " ns \n";
+	std::cout << "parser avg. time per single executiom (with vector size in mind): " << parser_time/n_repeats/vec_size*1e9 << " ns \n";
+	std::cout << "c++ avg. time per single executiom (with vector size in mind)   : " << cpp_time/n_repeats/vec_size*1e9 << " ns \n";
 	double n_flop = n_repeats * vec_size * 9;
 	std::cout << "parser FLOPS: " << n_flop / parser_time << "\n";
 	std::cout << "c++ FLOPS   : " << n_flop / cpp_time << "\n";
@@ -207,7 +155,64 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 
 
 
-void test_expression() {
+
+///	EXPRESSIONS ///
+
+void expr1(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 3 * v1  + data.cs1 * v2 ;
+			}
+		}
+	}
+}
+
+void expr2(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] =  v1 + 1.1 ;
+			}
+		}
+	}
+}
+
+void expr3(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = sin(2.2 * v1) ;
+			}
+		}
+	}
+}
+
+void expr4(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 1 - sin(2.2 * v1) + cos(M_PI / v2);
+			}
+		}
+	}
+}
+
+
+
+
+
+void test_expressions() {
 	std::cout << "Starting tests.\n";
 	test_expr("3 * v1 + cs1 * v2", expr1);
 	test_expr("v1 + 1.1", expr2);
@@ -219,9 +224,5 @@ void test_expression() {
 
 int main()
 {
-	test_expression();
+	test_expressions();
 }
-
-
-
-
