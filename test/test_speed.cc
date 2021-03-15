@@ -29,8 +29,8 @@ struct ExprData {
 		subset = arena.create_array<uint>(vec_size);
 		for(uint i=0; i<vec_size/4; i++) subset[i] = i;
 		cs1 = 4;
-	}
-
+		}
+		
 	uint vec_size;
 	double *v1, *v2, *vres;
 	double cs1;
@@ -123,7 +123,7 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	for(uint dim=0; dim < 3; dim++) {
 		for(uint i=0; i<data1.vec_size; i++) {
 			double v1 = data1.vres[dim*data1.vec_size + i];
-			double v2 = data1.vres[dim*data2.vec_size + i];
+			double v2 = data2.vres[dim*data2.vec_size + i];
 			//std::cout << "res: " << v1 <<std::endl;
 			diff += std::fabs(v1 - v2);
 			p_sum += v1;
