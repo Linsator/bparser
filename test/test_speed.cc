@@ -24,15 +24,26 @@ struct ExprData {
 		fill_seq(v1, 100, 100 + 3 * vec_size);
 		v2 = arena.create_array<double>(vec_size * 3);
 		fill_seq(v2, 200, 200 + 3 * vec_size);
+		
+		v3 = arena.create_array<double>(vec_size * 3);
+		fill_seq(v3, 100, 100 + 3 * vec_size * 0.5, 0.5);
+		v4 = arena.create_array<double>(vec_size * 3);
+		fill_seq(v4, 200, 200 + 3 * vec_size * 0.5, 0.5);
+		
 		vres = arena.create_array<double>(vec_size * 3);
 		fill_const(vres, 3 * vec_size, -100);
 		subset = arena.create_array<uint>(vec_size);
 		for(uint i=0; i<vec_size/4; i++) subset[i] = i;
 		cs1 = 4;
+		for (int i = 0; i < 3; i++)
+		{
+			cv1[i] = (i+1)*3;
 		}
 		
+	}
+
 	uint vec_size;
-	double *v1, *v2, *vres;
+	double *v1, *v2, *v3, *v4, *vres;
 	double cs1;
 	double cv1[3];
 	uint *subset;
@@ -49,48 +60,24 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 10000;
+	uint n_repeats = 1000;
 
-	ArenaAlloc arena_1(32, 10*vec_size *sizeof(double));
+	ArenaAlloc arena_1(32, 16*vec_size *sizeof(double));
 	ExprData data1(arena_1, vec_size);
-	ArenaAlloc arena_2(32, 10*vec_size *sizeof(double));
+	ArenaAlloc arena_2(32, 16*vec_size *sizeof(double));
 	ExprData data2(arena_2, vec_size);
 
 	Parser p(block_size);
 	p.parse(expr);
 
-
-	/*
-	// Get symbols used in the expressions.
-	std::vector<std::string> variables = p.variables();
-	std::cout << "Symbols: " << print_vector(p.variables()) << "\n";
-
-		not sure if worth it
-	if (std::find(variables.begin(), variables.end(), "cs1") != variables.end())	//if expession contains cs1 sets it
-	{
-		p.set_constant("cs1", {}, 	{data1.cs1});
-	}
-
-	if (std::find(variables.begin(), variables.end(), "cv1") != variables.end())	//if expession contains cs1 sets it
-	{
-		p.set_constant("cv1", {3}, 	std::vector<double>(data1.cv1, data1.cv1+3));
-	}
-
-	if (std::find(variables.begin(), variables.end(), "v1") != variables.end())	//if expession contains cs1 sets it
-	{
-		p.set_variable("v1", {3}, data1.v1);
-	}
-
-	if (std::find(variables.begin(), variables.end(), "v2") != variables.end())	//if expession contains cs1 sets it
-	{
-		p.set_variable("v2", {3}, data1.v2);
-	}
-	*/
-
 	p.set_constant("cs1", {}, 	{data1.cs1});
 	p.set_constant("cv1", {3}, 	std::vector<double>(data1.cv1, data1.cv1+3));
 	p.set_variable("v1", {3}, data1.v1);
 	p.set_variable("v2", {3}, data1.v2);
+	
+	p.set_variable("v3", {3}, data1.v3);
+	p.set_variable("v4", {3}, data1.v4);
+	
 	p.set_variable("_result_", {3}, data1.vres);
 	//std::cout << "vres: " << vres << ", " << vres + block_size << ", " << vres + 2*vec_size << "\n";
 	//std::cout << "Symbols: " << print_vector(p.symbols()) << "\n";
