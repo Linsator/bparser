@@ -188,16 +188,179 @@ void expr4(ExprData &data) {
 	}
 }
 
+void expr5(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				data.vres[j+k] = v1 + v2 + v3 + v4;
+			}
+		}
+	}
+}
 
+void expr6(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = 3 * cv1 + data.cs1 * v2 + 7 * v3;
+			}
+		}
+	}
+}
+
+void expr7(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 1.1 * pow(v1, 2) + 2.2 * pow(v2, 3);
+			}
+		}
+	}
+}
+
+void expr8(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				data.vres[j+k] = 1.1 * pow(v1, 2) + 2.2 * pow(v2, 3) + 3.3 * pow(v3,4) + 3.3 * pow(v1,5);
+			}
+		}
+	}
+}
+
+void expr9(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 1.1 * pow(v1,2.01) + 2.2 * pow(v2,3.01);
+			}
+		}
+	}
+}
+
+void expr10(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				data.vres[j+k] = 1.1 * pow(v1,2.01) + 2.2 * pow(v2,3.01) + 3.3 * pow(v3,4.01);
+			}
+		}
+	}
+}
+
+void expr11(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = (v1/1.1)+(v1/2.2)+(v1/3.3)+(v1/4.4)+(v1/5.5)+(v1/6.6)+(v1/7.7)+(v1/8.8)+(v1/9.9)+(v1/1.10);
+			}
+		}
+	}
+}
+
+void expr12(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = abs(sin(sqrt(pow(v1,2)+pow(v2,2))));
+			}
+		}
+	}
+}
+
+void expr13(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = pow((v1-3.3*v2),-2)+pow((3/(v1+(abs(data.cs1)+1))),-3);
+			}
+		}
+	}
+}
+
+void expr14(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = (0.1*v1+1)*v1+1.1-sin(v1)-log(v1)/v1*3/4;
+			}
+		}
+	}
+}
+
+/*
+void expr(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = ;
+			}
+		}
+	}
+}
+*/
 
 
 
 void test_expressions() {
 	std::cout << "Starting tests.\n";
-	test_expr("3 * v1 + cs1 * v2", expr1);
+	test_expr("3 * cv1 + cs1 * v2 + 7 * v3", expr6);
 	test_expr("v1 + 1.1", expr2);
+	test_expr("v1 + v2 + v3 + v4", expr5);
+	test_expr("3 * v1 + cs1 * v2", expr1);
 	test_expr("sin(2.2 * v1)", expr3);
 	test_expr("1 - sin(2.2 * v1) + cos(pi / v2)", expr4);
+	test_expr("1.1 * v1**2 + 2.2 * v2**3", expr7);
+	test_expr("1.1 * v1**2 + 2.2 * v2**3 + 3.3*v3**4 + 3.3 * v1**5", expr8);
+	test_expr("1.1 * v1**2.01 + 2.2 * v2**3.01", expr9);
+	test_expr("1.1 * v1**2.01 + 2.2 * v2**3.01 + 3.3 * v3**4.01", expr10);
+
+	test_expr("(v1/1.1)+(v1/2.2)+(v1/3.3)+(v1/4.4)+(v1/5.5)+(v1/6.6)+(v1/7.7)+(v1/8.8)+(v1/9.9)+(v1/1.10)", expr11);
+	test_expr("abs(sin(sqrt(v1**2+v2**2)))", expr12);
+	test_expr("(v1-3.3*v2)**-2+(3/(v1+(abs(cs1)+1)))**-3", expr13);
+	test_expr("(0.1*v1+1)*v1+1.1-sin(v1)-log(v1)/v1*3/4", expr14);
+
+
+	
 }
 
 
