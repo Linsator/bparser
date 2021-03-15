@@ -60,7 +60,7 @@ void test_expr(std::string expr, void (*f)(ExprData&)) {
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 1000;
+	uint n_repeats = 1000000;
 
 	ArenaAlloc arena_1(32, 16*vec_size *sizeof(double));
 	ExprData data1(arena_1, vec_size);
@@ -321,6 +321,19 @@ void expr14(ExprData &data) {
 	}
 }
 
+void expr15(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = (pow(v1, 2) / sin(2 * M_PI / v2)) - v1 / 2;
+			}
+		}
+	}
+}
+
 /*
 void expr(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
@@ -343,6 +356,7 @@ void expr(ExprData &data) {
 
 void test_expressions() {
 	std::cout << "Starting tests.\n";
+	
 	test_expr("3 * cv1 + cs1 * v2 + 7 * v3", expr6);
 	test_expr("v1 + 1.1", expr2);
 	test_expr("v1 + v2 + v3 + v4", expr5);
@@ -358,6 +372,9 @@ void test_expressions() {
 	test_expr("abs(sin(sqrt(v1**2+v2**2)))", expr12);
 	test_expr("(v1-3.3*v2)**-2+(3/(v1+(abs(cs1)+1)))**-3", expr13);
 	test_expr("(0.1*v1+1)*v1+1.1-sin(v1)-log(v1)/v1*3/4", expr14);
+	
+	//compare with other parsers
+	test_expr("(v1**2 / sin(2 * pi / v2)) - v1 / 2", expr15);
 
 
 	
