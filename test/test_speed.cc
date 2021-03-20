@@ -102,7 +102,7 @@ void test_expr_parser(std::string expr, void (*f)(ExprData&), std::string expr_i
 		}
 	}
 
-	std::cout << "Expresion " << expr_id << ": " << expr << "\n";
+	std::cout << "Expression " << expr_id << ": " << expr << "\n";
 	std::cout << "Result      : " << p_sum << "\n";
 	std::cout << "Repeats     : " << n_repeats << "\n";
 	std::cout << "parser time : " << parser_time << " s \n";
@@ -145,11 +145,11 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id) 
 		}
 	}
 
-	std::cout << "Expresion " << expr_id << ": " << expr << "\n";
+	std::cout << "Expression " << expr_id << ": " << expr << "\n";
 	std::cout << "Result      : " << c_sum << "\n";
 	std::cout << "Repeats     : " << n_repeats << "\n";
 	std::cout << "c++ time    : " << cpp_time << " s \n";
-	std::cout << "c++ avg. time per single execution (with vector size in mind)   : " << cpp_time/n_repeats/vec_size*1e9 << " ns \n";
+	std::cout << "c++ avg. time per single execution (with vector size in mind): " << cpp_time/n_repeats/vec_size*1e9 << " ns \n";
 	double n_flop = n_repeats * vec_size * 9;
 	std::cout << "c++ FLOPS   : " << n_flop / cpp_time << "\n";
 	std::cout << "\n";
