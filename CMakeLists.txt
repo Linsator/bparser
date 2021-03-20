@@ -222,5 +222,6 @@ define_test(test_parser bparser)
 define_test(test_array)
 define_test(test_grammar bparser)
 define_test(test_processor)
-define_test(test_speed bparser)  
+define_test(test_speed bparser)
+define_test(test_speed_old bparser)  
 
