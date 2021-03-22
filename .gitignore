@@ -43,3 +43,6 @@ build/*
 #boost
 boost_build
 include/boost
+
+vystup.csv
+test/test.png
