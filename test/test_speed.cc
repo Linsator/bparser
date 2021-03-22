@@ -10,6 +10,8 @@
 
 #include <string>
 #include <chrono>
+#include <iostream>
+#include <fstream>
 #include "assert.hh"
 #include "parser.hh"
 #include "test_tools.hh"
@@ -51,7 +53,7 @@ struct ExprData {
 };
 
 
-void test_expr_parser(std::string expr, void (*f)(ExprData&), std::string expr_id) {
+void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file) {
 	using namespace bparser;
 	uint block_size = 1024; // number of floats
 	uint vec_size = 1*block_size;
@@ -60,7 +62,7 @@ void test_expr_parser(std::string expr, void (*f)(ExprData&), std::string expr_i
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 1000000;
+	uint n_repeats = 1000;
 
 	ArenaAlloc arena_1(32, 16*vec_size *sizeof(double));
 	ExprData data1(arena_1, vec_size);
@@ -110,10 +112,12 @@ void test_expr_parser(std::string expr, void (*f)(ExprData&), std::string expr_i
 	double n_flop = n_repeats * vec_size * 9;
 	std::cout << "parser FLOPS: " << n_flop / parser_time << "\n";
 	std::cout << "\n";
+
+	file << "Bparser,"<< expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop << "\n";
     
 }
 
-void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id) {
+void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, std::ofstream& file) {
 	using namespace bparser;
 	uint block_size = 1024; // number of floats
 	uint vec_size = 1*block_size;
@@ -122,7 +126,7 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id) 
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 1000000;
+	uint n_repeats = 1000;
 
 	ArenaAlloc arena_2(32, 16*vec_size *sizeof(double));
 	ExprData data2(arena_2, vec_size);
@@ -153,6 +157,9 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id) 
 	double n_flop = n_repeats * vec_size * 9;
 	std::cout << "c++ FLOPS   : " << n_flop / cpp_time << "\n";
 	std::cout << "\n";
+
+	file << "C++,"<< expr << "," << c_sum << "," << n_repeats << "," << cpp_time << "," << cpp_time/n_repeats/vec_size*1e9 << "," << n_flop << "\n";
+	
     
 }
 
@@ -275,6 +282,30 @@ void expr_test3B(ExprData &data) {
 	}
 }
 
+void expr_test4A(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = pow(v1,3);
+			}
+		}
+	}
+}
+
+void expr_test4B(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = pow(v1,3.01);
+			}
+		}
+	}
+}
+
 
 /*
 void expr(ExprData &data) {
@@ -297,37 +328,51 @@ void expr(ExprData &data) {
 
 
 void test_expressions() {
+
+	std::ofstream file;
+	file.open("vystup.csv");
+
+	//header
+	file << "Executor,Expression, Result,Repeats,time,avg. time per single execution,FLOPS\n";
+
 	std::cout << "Starting tests.\n";
 
     std::cout << "\nPARSER\n";
 	
-	test_expr_parser("v1 + 1.1", expr1, "1");
-	test_expr_parser("v1 + v2 + v3 + v4", expr2, "2");
+	test_expr_parser("v1 + 1.1", "1", file);
+	test_expr_parser("v1 + v2 + v3 + v4", "2", file);
 
-	test_expr_parser("v1 * v1", expr_test1, "test1");
-    test_expr_parser("v1**2", expr_test1A, "test1A");
+	test_expr_parser("v1 * v1", "test1", file);
+    test_expr_parser("v1**2", "test1A", file);
 
-    test_expr_parser("v1 / 3", expr_test2, "test2");
-    test_expr_parser("v1 * 3", expr_test2A, "test2A");
+    test_expr_parser("v1 / 3", "test2", file);
+    test_expr_parser("v1 * 3", "test2A", file);
 
-    test_expr_parser("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3, "test3");
-    test_expr_parser("abs(sin(sqrt(v1)))", expr_test3A, "test3A");
-    test_expr_parser("v1**2 + v2**2", expr_test3B, "test3B");
+    test_expr_parser("abs(sin(sqrt(v1**2 + v2**2)))", "test3", file);
+    test_expr_parser("abs(sin(sqrt(v1)))", "test3A", file);
+    test_expr_parser("v1**2 + v2**2", "test3B", file);
+
+	test_expr_parser("v1**3", "test4A", file);
+	test_expr_parser("v1**3.01","test4B", file);
+
 
     std::cout << "\nC++\n";
 
-    test_expr_cpp("v1 + 1.1", expr1, "1");
-	test_expr_cpp("v1 + v2 + v3 + v4", expr2, "2");
+    test_expr_cpp("v1 + 1.1", expr1, "1", file);
+	test_expr_cpp("v1 + v2 + v3 + v4", expr2, "2", file);
 
-	test_expr_cpp("v1 * v1", expr_test1, "test1");
-    test_expr_cpp("v1**2", expr_test1A, "test1A");
+	test_expr_cpp("v1 * v1", expr_test1, "test1", file);
+    test_expr_cpp("v1**2", expr_test1A, "test1A", file);
 
-    test_expr_cpp("v1 / 3", expr_test2, "test2");
-    test_expr_cpp("v1 * 3", expr_test2A, "test2A");
+    test_expr_cpp("v1 / 3", expr_test2, "test2", file);
+    test_expr_cpp("v1 * 3", expr_test2A, "test2A", file);
 
-    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3, "test3");
-    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3A, "test3A");
-    test_expr_cpp("v1**2 + v2**2", expr_test3B, "test3B");
+    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3, "test3", file);
+    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3A, "test3A", file);
+    test_expr_cpp("v1**2 + v2**2", expr_test3B, "test3B", file);
+
+	test_expr_cpp("v1**3", expr_test4A, "test4A", file);
+	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file);
 }
 
 
