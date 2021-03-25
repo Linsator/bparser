@@ -94,7 +94,7 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, 
 	std::cout << "c++ FLOPS   : " << n_flop / cpp_time << "\n";
 	std::cout << "\n";
 
-	file << "C++,"<< expr << "," << c_sum << "," << n_repeats << "," << cpp_time << "," << cpp_time/n_repeats/vec_size*1e9 << "," << n_flop/cpp_time << "\n";
+	file << "C++,"<< expr_id << ","<< expr << "," << c_sum << "," << n_repeats << "," << cpp_time << "," << cpp_time/n_repeats/vec_size*1e9 << "," << n_flop/cpp_time << "\n";
 }
 
 
@@ -240,9 +240,48 @@ void expr_test4B(ExprData &data) {
 	}
 }
 
+void expr_test5A(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				data.vres[j+k] = pow(v1,2) + pow(v2,2) + pow(v3,2);
+			}
+		}
+	}
+}
+
+void expr_test5B(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = sqrt(v1);
+			}
+		}
+	}
+}
+
+void expr_test5C(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				data.vres[j+k] = sqrt(pow(v1,2) + pow(v2,2) + pow(v3,2));
+			}
+		}
+	}
+}
 
 /*
-void expr(ExprData &data) {
+void expr_test(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -275,7 +314,7 @@ void test_expressions(std::string filename) {
 	}
 
 	//header
-	file << "Executor,Expression,Result,Repeats,Time,Avg. time per single execution,FLOPS\n";
+	file << "Executor,ID,Expression,Result,Repeats,Time,Avg. time per single execution,FLOPS\n";
 
 	std::cout << "Starting tests with C++.\n";
 
@@ -294,6 +333,10 @@ void test_expressions(std::string filename) {
 
 	test_expr_cpp("v1**3", expr_test4A, "test4A", file);
 	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file);
+
+	test_expr_cpp("v1**2 + v2**2 + v3**2", expr_test5A, "test5A", file);
+	test_expr_cpp("sqrt(v1)", expr_test5B, "test5B", file);
+	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5C, "test5C", file);
 }
 
 
