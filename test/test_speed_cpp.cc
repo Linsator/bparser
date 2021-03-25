@@ -261,10 +261,18 @@ void expr(ExprData &data) {
 
 
 
-void test_expressions() {
+void test_expressions(std::string filename) {
 
 	std::ofstream file;
-	file.open("vystup.csv");
+	if(!filename.empty())
+	{
+		file.open(filename);
+		std::cout << "Outputing to " << filename << "\n";
+	}
+	else
+	{
+		file.open("vystup.csv");
+	}
 
 	//header
 	file << "Executor, Expression, Result, Repeats, Time, Avg. time per single execution, FLOPS\n";
@@ -290,7 +298,12 @@ void test_expressions() {
 
 
 
-int main()
+int main(int argc, char * argv[])
 {
-	test_expressions();
+	std::string soubor = "";
+	if(argc > 1)
+	{
+		soubor = argv[1]; 
+	}
+	test_expressions(soubor);
 }
