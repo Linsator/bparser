@@ -162,18 +162,18 @@ void test_expressions(std::string filename) {
 
 	std::cout << "Starting tests with BParser.\n";
 	
-	test_expr_parser("v1 + 1.1", "1", file);
-	test_expr_parser("v1 + v2 + v3 + v4", "2", file);
+	test_expr_parser("v1 + 1.1", "test0A", file);
+	test_expr_parser("v1 + v2 + v3 + v4", "test0B", file);
 
-	test_expr_parser("v1 * v1", "test1", file);
-    test_expr_parser("v1**2", "test1A", file);
+	test_expr_parser("v1 * v1", "test1A", file);
+    test_expr_parser("v1**2", "test1B", file);
 
-    test_expr_parser("v1 / 3", "test2", file);
-    test_expr_parser("v1 * 3", "test2A", file);
+    test_expr_parser("v1 / 3", "test2A", file);
+    test_expr_parser("v1 * 3", "test2B", file);
 
-    test_expr_parser("abs(sin(sqrt(v1**2 + v2**2)))", "test3", file);
-    test_expr_parser("abs(sin(sqrt(v1)))", "test3A", file);
-    test_expr_parser("v1**2 + v2**2", "test3B", file);
+    test_expr_parser("abs(sin(sqrt(v1**2 + v2**2)))", "test3A", file);
+    test_expr_parser("abs(sin(sqrt(v1)))", "test3B", file);
+    test_expr_parser("v1**2 + v2**2", "test3C", file);
 
 	test_expr_parser("v1**3", "test4A", file);
 	test_expr_parser("v1**3.01","test4B", file);
@@ -191,6 +191,28 @@ void test_expressions(std::string filename) {
 	test_expr_parser("a[0,0]*a[1,1]*a[2,2]", "test6", file);
 	test_expr_parser("a[0,0]*a[1,1]*a[2,2] + a[0,1]*a[1,2]*a[2,0] + a[0,2]*a[1,0]*a[2,1] - a[2,0]*a[1,1]*a[0,2]-a[2,1]*a[1,2]*a[0,0]-a[2,2]*a[1,0]*a[0,1]", "test6A", file);
 	*/
+
+	test_expr_parser("v1 * v2", "test7A", file);
+	test_expr_parser("v1 * v2 * v3 * v4", "test7B", file);
+
+	test_expr_parser("3 * v1", "test7C", file);
+	test_expr_parser("cs1 * v1", "test7D", file);
+
+	test_expr_parser("3 * v1 + v1 * v2", "test7E", file);
+	test_expr_parser("3 * v1 * v1 * v2", "test7F", file);
+
+	test_expr_parser("3 * v1 + v1 * v2", "test7G", file);
+
+	test_expr_parser("cv1 * v3", "test7H", file);
+	test_expr_parser("cv1 + v4", "test7I", file);
+	
+	test_expr_parser("cv1 * v3 + cv1 + v4", "test7J", file);
+	test_expr_parser("cv1 * v3 * cv1 + v4", "test7K", file);
+
+	test_expr_parser("(cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4)", "test7L", file);
+	test_expr_parser("(cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4)", "test7M", file);
+
+
 }
 
 
