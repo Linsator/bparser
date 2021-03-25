@@ -53,7 +53,7 @@ struct ExprData {
 };
 
 
-void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, std::ofstream& file) {
+void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, std::ofstream& file, uint n_repeats) {
 	using namespace bparser;
 	uint block_size = 1024; // number of floats
 	uint vec_size = 1*block_size;
@@ -473,7 +473,7 @@ void expr_test(ExprData &data) {
 
 
 
-void test_expressions(std::string filename) {
+void test_expressions(std::string filename, uint n_repeats) {
 
 	std::ofstream file;
 	if(!filename.empty())
@@ -491,47 +491,47 @@ void test_expressions(std::string filename) {
 
 	std::cout << "Starting tests with C++.\n";
 
-    test_expr_cpp("v1 + 1.1", expr_test0A, "test0A", file);
-	test_expr_cpp("v1 + v2 + v3 + v4", expr_test0B, "test0B", file);
+    test_expr_cpp("v1 + 1.1", expr_test0A, "test0A", file, n_repeats);
+	test_expr_cpp("v1 + v2 + v3 + v4", expr_test0B, "test0B", file, n_repeats);
 
-	test_expr_cpp("v1 * v1", expr_test1A, "test1A", file);
-    test_expr_cpp("v1**2", expr_test1B, "test1B", file);
+	test_expr_cpp("v1 * v1", expr_test1A, "test1A", file, n_repeats);
+    test_expr_cpp("v1**2", expr_test1B, "test1B", file, n_repeats);
 
-    test_expr_cpp("v1 / 3", expr_test2A, "test2A", file);
-    test_expr_cpp("v1 * 3", expr_test2B, "test2B", file);
+    test_expr_cpp("v1 / 3", expr_test2A, "test2A", file, n_repeats);
+    test_expr_cpp("v1 * 3", expr_test2B, "test2B", file, n_repeats);
 
-    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3A, "test3A", file);
-    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3B, "test3B", file);
-    test_expr_cpp("v1**2 + v2**2", expr_test3C, "test3C", file);
+    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3A, "test3A", file, n_repeats);
+    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3B, "test3B", file, n_repeats);
+    test_expr_cpp("v1**2 + v2**2", expr_test3C, "test3C", file, n_repeats);
 
-	test_expr_cpp("v1**3", expr_test4A, "test4A", file);
-	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file);
+	test_expr_cpp("v1**3", expr_test4A, "test4A", file, n_repeats);
+	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file, n_repeats);
 
-	test_expr_cpp("v1**2 + v2**2 + v3**2", expr_test5A, "test5A", file);
-	test_expr_cpp("sqrt(v1)", expr_test5B, "test5B", file);
-	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5C, "test5C", file);
+	test_expr_cpp("v1**2 + v2**2 + v3**2", expr_test5A, "test5A", file, n_repeats);
+	test_expr_cpp("sqrt(v1)", expr_test5B, "test5B", file, n_repeats);
+	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5C, "test5C", file, n_repeats);
 
 	//matrix
 
-	test_expr_cpp("v1 * v2", expr_test7A, "test7A", file);
-	test_expr_cpp("v1 * v2 * v3 * v4", expr_test7B, "test7B", file);
+	test_expr_cpp("v1 * v2", expr_test7A, "test7A", file, n_repeats);
+	test_expr_cpp("v1 * v2 * v3 * v4", expr_test7B, "test7B", file, n_repeats);
 
-	test_expr_cpp("3 * v1", expr_test7C, "test7C", file);
-	test_expr_cpp("cs1 * v1", expr_test7D, "test7D", file);
+	test_expr_cpp("3 * v1", expr_test7C, "test7C", file, n_repeats);
+	test_expr_cpp("cs1 * v1", expr_test7D, "test7D", file, n_repeats);
 
-	test_expr_cpp("3 * v1 + v1 * v2", expr_test7E, "test7E", file);
-	test_expr_cpp("3 * v1 * v1 * v2", expr_test7F, "test7F", file);
+	test_expr_cpp("3 * v1 + v1 * v2", expr_test7E, "test7E", file, n_repeats);
+	test_expr_cpp("3 * v1 * v1 * v2", expr_test7F, "test7F", file, n_repeats);
 
-	test_expr_cpp("cs1 * v1 + v1 * v2", expr_test7G, "test7G", file);
+	test_expr_cpp("cs1 * v1 + v1 * v2", expr_test7G, "test7G", file, n_repeats);
 
-	test_expr_cpp("cv1 * v3", expr_test7H, "test7H", file);
-	test_expr_cpp("cv1 + v4", expr_test7I, "test7I", file);
+	test_expr_cpp("cv1 * v3", expr_test7H, "test7H", file, n_repeats);
+	test_expr_cpp("cv1 + v4", expr_test7I, "test7I", file, n_repeats);
 	
-	test_expr_cpp("cv1 * v3 + cv1 + v4", expr_test7J, "test7J", file);
-	test_expr_cpp("cv1 * v3 * cv1 + v4", expr_test7K, "test7K", file);
+	test_expr_cpp("cv1 * v3 + cv1 + v4", expr_test7J, "test7J", file, n_repeats);
+	test_expr_cpp("cv1 * v3 * cv1 + v4", expr_test7K, "test7K", file, n_repeats);
 
-	test_expr_cpp("(cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4)", expr_test7L, "test7L", file);
-	test_expr_cpp("(cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4)", expr_test7M, "test7M", file);
+	test_expr_cpp("(cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4)", expr_test7L, "test7L", file, n_repeats);
+	test_expr_cpp("(cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4)", expr_test7M, "test7M", file, n_repeats);
 }
 
 
@@ -539,9 +539,11 @@ void test_expressions(std::string filename) {
 int main(int argc, char * argv[])
 {
 	std::string soubor = "";
+	uint n_repeats = 1000;
 	if(argc > 1)
 	{
 		soubor = argv[1]; 
+		n_repeats = std::stoi(argv[2]);
 	}
-	test_expressions(soubor);
+	test_expressions(soubor, n_repeats);
 }
