@@ -111,11 +111,12 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	double parser_time  =
 			std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time).count();
 
+	/*
 	for(int i = 0; i<3*1024; i++)
 	{
 		printf("%f\n", data1.vres[i]);
 	}
-
+	*/
 	// check
 	double p_sum = 0;
 	for(uint dim=0; dim < 3; dim++) {
@@ -177,17 +178,19 @@ void test_expressions(std::string filename) {
 	test_expr_parser("v1**3", "test4A", file);
 	test_expr_parser("v1**3.01","test4B", file);
 
-	test_expr_parser("v1**2 + v2**2 + v3***2", "test5A", file);
+	test_expr_parser("v1**2 + v2**2 + v3**2", "test5A", file);
 	test_expr_parser("sqrt(v1)", "test5B", file);
-	test_expr_parser("sqrt(v1**2 + v2**2 + v3***2)", "test5C", file);
+	test_expr_parser("sqrt(v1**2 + v2**2 + v3**2)", "test5C", file);
 	
 
 	//determinant 3x3 matice
+	/*
 	test_expr_parser("cv1", "test6", file);
 	test_expr_parser("a[0,0]", "test6", file);
 	test_expr_parser("a[0,1]", "test6", file);
 	test_expr_parser("a[0,0]*a[1,1]*a[2,2]", "test6", file);
 	test_expr_parser("a[0,0]*a[1,1]*a[2,2] + a[0,1]*a[1,2]*a[2,0] + a[0,2]*a[1,0]*a[2,1] - a[2,0]*a[1,1]*a[0,2]-a[2,1]*a[1,2]*a[0,0]-a[2,2]*a[1,0]*a[0,1]", "test6A", file);
+	*/
 }
 
 
