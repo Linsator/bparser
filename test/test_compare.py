@@ -42,12 +42,12 @@ if __name__ == "__main__":
     #data_sort_by_expressions = data.sort_values(by=['Expression'])
     #data_sort_by_expressions_and_executor = data.sort_values(by=['Expression', 'Executor'])
 
-    data_med = data.groupby(['Executor', 'Expression'], as_index=False)['Time'].median()
+    data_med = data.groupby(['Executor', 'ID', 'Expression'], as_index=False)['Time'].median()
 
-    titlestring = "Expresion by time execution for " + str(data['Repeats'].values[0]) + " times"
+    title_string = "Expression by time execution for " + str(data['Repeats'].values[0]) + " repeats"
     #Figure
     fig = px.scatter(data_med, x="Time", y="Expression", color="Executor",
-                 title=titlestring,
+                 title=title_string,
                  labels={"Time":"Time (s)", "Expression":"Expressions"} # customize axis label
                 )
 
