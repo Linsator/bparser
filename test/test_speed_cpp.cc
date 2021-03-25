@@ -62,7 +62,7 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, 
 	// e.g. p.set_variable could return pointer to that pointer
 	// not so easy for vector and tensor variables, there are many pointers to set
 	// Rather modify the test to fill the
-	uint n_repeats = 1000;
+	//uint n_repeats = 1000;
 
 	ArenaAlloc arena_2(32, 16*vec_size *sizeof(double));
 	ExprData data2(arena_2, vec_size);
