@@ -201,7 +201,7 @@ void test_expressions(std::string filename, int n_repeats) {
 	test_expr_parser("3 * v1 + v1 * v2", "test7E", file, n_repeats);
 	test_expr_parser("3 * v1 * v1 * v2", "test7F", file, n_repeats);
 
-	test_expr_parser("3 * v1 + v1 * v2", "test7G", file, n_repeats);
+	test_expr_parser("cs1 * v1 + v1 * v2", "test7G", file, n_repeats);
 
 	test_expr_parser("cv1 * v3", "test7H", file, n_repeats);
 	test_expr_parser("cv1 + v4", "test7I", file, n_repeats);
