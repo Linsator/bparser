@@ -1,28 +1,36 @@
 import csv
+import string
+
 import subprocess
 import os
 
-import string
-
-
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 if __name__ == "__main__":
 
+    run_tests_switch = False
+    
     path = os.getcwd()
     path_parent = os.path.dirname(os.getcwd())
 
     num_of_test_runs = 5
     files = []
 
-    for i in range(1,num_of_test_runs+1):
-        #cporcess = subprocess.run(["./test_speed_parser_bin", f"test_parser{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
-        #os.replace(os.path.join(path_parent, "build", f"test_parser{i}.csv"), os.path.join(path_parent, "test", f"test_parser{i}.csv"))
+    for i in range(1, num_of_test_runs + 1):
+        #BParser
+        if run_tests_switch:
+            cporcess = subprocess.run(["./test_speed_parser_bin", f"test_parser{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
+            os.replace(os.path.join(path_parent, "build", f"test_parser{i}.csv"), os.path.join(path_parent, "test", f"test_parser{i}.csv"))
+        
         files.append(os.path.join(path_parent, "test", f"test_parser{i}.csv"))
-        #cporcess = subprocess.run(["./test_speed_cpp_bin", f"test_cpp{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
-        #os.replace(os.path.join(path_parent, "build", f"test_cpp{i}.csv"), os.path.join(path_parent, "test", f"test_cpp{i}.csv"))
+        
+        #C++
+        if run_tests_switch:
+            cporcess = subprocess.run(["./test_speed_cpp_bin", f"test_cpp{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
+            os.replace(os.path.join(path_parent, "build", f"test_cpp{i}.csv"), os.path.join(path_parent, "test", f"test_cpp{i}.csv"))
+        
         files.append(os.path.join(path_parent, "test", f"test_cpp{i}.csv"))
 
     list_of_dataframes = []
@@ -31,14 +39,19 @@ if __name__ == "__main__":
             list_of_dataframes.append(pd.read_csv(f))
     data = pd.concat(list_of_dataframes)
 
+    data_sort_by_expressions = data.sort_values(by=['Expression'])
+    data_sort_by_expressions_and_executor = data.sort_values(by=['Expression', 'Executor'])
 
-    expresions = [x[0][1] for x in list_by_experesions]
-    time_p = [float(x[0][5]) for x in newlist]
-    time_c = [float(x[1][5]) for x in newlist]
-    plt.bar(expresions, time_p)
-    plt.bar(expresions, time_c, align='edge')
+    #Figure
+    fig = px.scatter(data, x="Time", y="Expression", color="Executor",
+                 title="Expression time by executor",
+                 labels={"Time":"Time (s)", "Expression":"Expressions"} # customize axis label
+                )
 
-    plt.savefig("test.png")
+    fig.show()
 
 
+    #expresions = [x[0][1] for x in list_by_experesions]
+    #time_p = [float(x[0][5]) for x in newlist]
+    #time_c = [float(x[1][5]) for x in newlist]
 
