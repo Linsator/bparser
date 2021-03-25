@@ -275,7 +275,7 @@ void test_expressions(std::string filename) {
 	}
 
 	//header
-	file << "Executor, Expression, Result, Repeats, Time, Avg. time per single execution, FLOPS\n";
+	file << "Executor,Expression,Result,Repeats,Time,Avg. time per single execution,FLOPS\n";
 
 	std::cout << "Starting tests with C++.\n";
 
