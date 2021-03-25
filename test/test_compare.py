@@ -1,5 +1,6 @@
 import csv
 import subprocess
+import os
 
 import string
 
@@ -7,10 +8,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    with open('vystup.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-        header = next(reader)
-        data = list(reader)
+
+    path = os.getcwd()
+    path_parent = os.path.dirname(os.getcwd())
+
+    num_of_test_runs = 5
+
+    for i in range(1,num_of_test_runs+1):
+        cporcess = subprocess.run(["./test_speed_bin", f"test{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
+        os.replace(os.path.join(path_parent, "build", f"test{i}.csv"), os.path.join(path_parent, "test", f"test{i}.csv"))
+    print("\n")
+
+    files = [f"test{i}.csv" for i in range(1,num_of_test_runs+1)]
+
+    data = []
+
+    for f in files:
+        with open(f, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+            header = next(reader)
+            data += list(reader)
 
 
     podle_ceho = 1 #index 1 = podle expersions
@@ -25,8 +42,5 @@ if __name__ == "__main__":
 
     plt.savefig("test.png")
 
-    print("\n")
-
-    #subprocess.call() #dokáže zavolat gcc nebo mělo by i make
 
 
