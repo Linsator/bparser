@@ -94,7 +94,7 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, 
 	std::cout << "c++ FLOPS   : " << n_flop / cpp_time << "\n";
 	std::cout << "\n";
 
-	file << "C++,"<< expr << "," << c_sum << "," << n_repeats << "," << cpp_time << "," << cpp_time/n_repeats/vec_size*1e9 << "," << n_flop << "\n";
+	file << "C++,"<< expr << "," << c_sum << "," << n_repeats << "," << cpp_time << "," << cpp_time/n_repeats/vec_size*1e9 << "," << n_flop/cpp_time << "\n";
 }
 
 
