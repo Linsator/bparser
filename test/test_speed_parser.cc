@@ -113,7 +113,7 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	std::cout << "parser FLOPS: " << n_flop / parser_time << "\n";
 	std::cout << "\n";
 
-	file << "Bparser,"<< expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop << "\n";
+	file << "BParser,"<< expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop/parser_time << "\n";
     
 }
 
