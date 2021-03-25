@@ -103,7 +103,7 @@ void test_expr_cpp(std::string expr, void (*f)(ExprData&), std::string expr_id, 
 
 ///	EXPRESSIONS ///
 
-void expr1(ExprData &data) {
+void expr_test0A(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -115,7 +115,7 @@ void expr1(ExprData &data) {
 	}
 }
 
-void expr2(ExprData &data) {
+void expr_test0B(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -130,7 +130,7 @@ void expr2(ExprData &data) {
 	}
 }
 
-void expr_test1(ExprData &data) {
+void expr_test1A(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -142,7 +142,7 @@ void expr_test1(ExprData &data) {
 	}
 }
 
-void expr_test1A(ExprData &data) {
+void expr_test1B(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -154,7 +154,7 @@ void expr_test1A(ExprData &data) {
 	}
 }
 
-void expr_test2(ExprData &data) {
+void expr_test2A(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -166,7 +166,7 @@ void expr_test2(ExprData &data) {
 	}
 }
 
-void expr_test2A(ExprData &data) {
+void expr_test2B(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -178,7 +178,7 @@ void expr_test2A(ExprData &data) {
 	}
 }
 
-void expr_test3(ExprData &data) {
+void expr_test3A(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -191,7 +191,7 @@ void expr_test3(ExprData &data) {
 	}
 }
 
-void expr_test3A(ExprData &data) {
+void expr_test3B(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -203,7 +203,7 @@ void expr_test3A(ExprData &data) {
 	}
 }
 
-void expr_test3B(ExprData &data) {
+void expr_test3C(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -280,6 +280,179 @@ void expr_test5C(ExprData &data) {
 	}
 }
 
+void expr_test7A(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = v1 * v2;
+			}
+		}
+	}
+}
+
+void expr_test7B(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				data.vres[j+k] = v1 * v2 * v3 * v4;
+			}
+		}
+	}
+}
+
+void expr_test7C(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = 3 * v1;
+			}
+		}
+	}
+}
+
+void expr_test7D(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = data.cs1 * v1;
+			}
+		}
+	}
+}
+
+void expr_test7E(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 3 * v1 + v1 * v2;
+			}
+		}
+	}
+}
+
+void expr_test7F(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = 3 * v1 * v1 * v2;
+			}
+		}
+	}
+}
+
+void expr_test7G(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				double v2 = data.v2[j+k];
+				data.vres[j+k] = data.cs1 * v1 + v1 * v2;
+			}
+		}
+	}
+}
+
+void expr_test7H(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v3 = data.v3[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = cv1 * v3;
+			}
+		}
+	}
+}
+
+void expr_test7I(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = cv1 + v4;
+			}
+		}
+	}
+}
+
+void expr_test7J(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = cv1 * v3 + cv1 + v4;
+			}
+		}
+	}
+}
+
+void expr_test7K(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = cv1 * v3 * cv1 + v4;
+			}
+		}
+	}
+}
+
+void expr_test7L(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = (cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4);
+			}
+		}
+	}
+}
+
+void expr_test7M(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v3 = data.v3[j+k];
+				double v4 = data.v4[j+k];
+				double cv1 = data.cv1[i_comp/data.vec_size];
+				data.vres[j+k] = (cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4);
+			}
+		}
+	}
+}
+
 /*
 void expr_test(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
@@ -318,18 +491,18 @@ void test_expressions(std::string filename) {
 
 	std::cout << "Starting tests with C++.\n";
 
-    test_expr_cpp("v1 + 1.1", expr1, "1", file);
-	test_expr_cpp("v1 + v2 + v3 + v4", expr2, "2", file);
+    test_expr_cpp("v1 + 1.1", expr_test0A, "test0A", file);
+	test_expr_cpp("v1 + v2 + v3 + v4", expr_test0B, "test0B", file);
 
-	test_expr_cpp("v1 * v1", expr_test1, "test1", file);
-    test_expr_cpp("v1**2", expr_test1A, "test1A", file);
+	test_expr_cpp("v1 * v1", expr_test1A, "test1A", file);
+    test_expr_cpp("v1**2", expr_test1B, "test1B", file);
 
-    test_expr_cpp("v1 / 3", expr_test2, "test2", file);
-    test_expr_cpp("v1 * 3", expr_test2A, "test2A", file);
+    test_expr_cpp("v1 / 3", expr_test2A, "test2A", file);
+    test_expr_cpp("v1 * 3", expr_test2B, "test2B", file);
 
-    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3, "test3", file);
-    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3A, "test3A", file);
-    test_expr_cpp("v1**2 + v2**2", expr_test3B, "test3B", file);
+    test_expr_cpp("abs(sin(sqrt(v1**2 + v2**2)))", expr_test3A, "test3A", file);
+    test_expr_cpp("abs(sin(sqrt(v1)))", expr_test3B, "test3B", file);
+    test_expr_cpp("v1**2 + v2**2", expr_test3C, "test3C", file);
 
 	test_expr_cpp("v1**3", expr_test4A, "test4A", file);
 	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file);
@@ -337,6 +510,28 @@ void test_expressions(std::string filename) {
 	test_expr_cpp("v1**2 + v2**2 + v3**2", expr_test5A, "test5A", file);
 	test_expr_cpp("sqrt(v1)", expr_test5B, "test5B", file);
 	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5C, "test5C", file);
+
+	//matrix
+
+	test_expr_cpp("v1 * v2", expr_test7A, "test7A", file);
+	test_expr_cpp("v1 * v2 * v3 * v4", expr_test7B, "test7B", file);
+
+	test_expr_cpp("3 * v1", expr_test7C, "test7C", file);
+	test_expr_cpp("cs1 * v1", expr_test7D, "test7D", file);
+
+	test_expr_cpp("3 * v1 + v1 * v2", expr_test7E, "test7E", file);
+	test_expr_cpp("3 * v1 * v1 * v2", expr_test7F, "test7F", file);
+
+	test_expr_cpp("cs1 * v1 + v1 * v2", expr_test7G, "test7G", file);
+
+	test_expr_cpp("cv1 * v3", expr_test7H, "test7H", file);
+	test_expr_cpp("cv1 + v4", expr_test7I, "test7I", file);
+	
+	test_expr_cpp("cv1 * v3 + cv1 + v4", expr_test7J, "test7J", file);
+	test_expr_cpp("cv1 * v3 * cv1 + v4", expr_test7K, "test7K", file);
+
+	test_expr_cpp("(cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4)", expr_test7L, "test7L", file);
+	test_expr_cpp("(cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4)", expr_test7M, "test7M", file);
 }
 
 
