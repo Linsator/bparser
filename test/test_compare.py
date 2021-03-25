@@ -39,12 +39,15 @@ if __name__ == "__main__":
             list_of_dataframes.append(pd.read_csv(f))
     data = pd.concat(list_of_dataframes)
 
-    data_sort_by_expressions = data.sort_values(by=['Expression'])
-    data_sort_by_expressions_and_executor = data.sort_values(by=['Expression', 'Executor'])
+    #data_sort_by_expressions = data.sort_values(by=['Expression'])
+    #data_sort_by_expressions_and_executor = data.sort_values(by=['Expression', 'Executor'])
 
+    data_med = data.groupby(['Executor', 'Expression'], as_index=False)['Time'].median()
+
+    titlestring = "Expresion by time execution for " + str(data['Repeats'].values[0]) + " times"
     #Figure
-    fig = px.scatter(data, x="Time", y="Expression", color="Executor",
-                 title="Expression time by executor",
+    fig = px.scatter(data_med, x="Time", y="Expression", color="Executor",
+                 title=titlestring,
                  labels={"Time":"Time (s)", "Expression":"Expressions"} # customize axis label
                 )
 
