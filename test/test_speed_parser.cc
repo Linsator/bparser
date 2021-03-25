@@ -34,22 +34,35 @@ struct ExprData {
 		
 		vres = arena.create_array<double>(vec_size * 3);
 		fill_const(vres, 3 * vec_size, -100);
+
 		subset = arena.create_array<uint>(vec_size);
 		for(uint i=0; i<vec_size/4; i++) subset[i] = i;
 		cs1 = 4;
-		for (int i = 0; i < 3; i++)
+
+		for (uint i = 0; i < 3; i++)
 		{
 			cv1[i] = (i+1)*3;
+		}
+
+		a = arena.create_array<double>(vec_size * 9);
+		//fill_seq(a, 1, 1 + 9 * vec_size);
+		for(uint i = 0; i < 9; i++)
+		{
+			for (uint j = 0; j < vec_size; j++)
+			{
+				a[i*vec_size+j] = j*9+i+1;
+			}
 		}
 		
 	}
 
 	uint vec_size;
 	double *v1, *v2, *v3, *v4, *vres;
+	double *a;
 	double cs1;
 	double cv1[3];
 	uint *subset;
-
+	//double a[9];
 };
 
 
@@ -64,7 +77,7 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	// Rather modify the test to fill the
 	uint n_repeats = 1000;
 
-	ArenaAlloc arena_1(32, 16*vec_size *sizeof(double));
+	ArenaAlloc arena_1(32, (25*vec_size) *sizeof(double));
 	ExprData data1(arena_1, vec_size);
 
 	Parser p(block_size);
@@ -77,6 +90,10 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	
 	p.set_variable("v3", {3}, data1.v3);
 	p.set_variable("v4", {3}, data1.v4);
+
+
+	//p.set_constant("a", {3,3}, std::vector<double>(data1.a, data1.a+9));
+	p.set_variable("a", {3,3}, data1.a);
 	
 	p.set_variable("_result_", {3}, data1.vres);
 	//std::cout << "vres: " << vres << ", " << vres + block_size << ", " << vres + 2*vec_size << "\n";
@@ -94,6 +111,10 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	double parser_time  =
 			std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time).count();
 
+	for(int i = 0; i<3*1024; i++)
+	{
+		printf("%f\n", data1.vres[i]);
+	}
 
 	// check
 	double p_sum = 0;
@@ -113,8 +134,8 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	std::cout << "parser FLOPS: " << n_flop / parser_time << "\n";
 	std::cout << "\n";
 
-	file << "BParser,"<< expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop/parser_time << "\n";
-    
+	file << "BParser,"<< expr_id << "," << expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop/parser_time << "\n";
+   
 }
 
 
@@ -136,7 +157,7 @@ void test_expressions(std::string filename) {
 	}
 
 	//header
-	file << "Executor,Expression,Result,Repeats,Time,Avg. time per single execution,FLOPS\n";
+	file << "Executor,ID,Expression,Result,Repeats,Time,Avg. time per single execution,FLOPS\n";
 
 	std::cout << "Starting tests with BParser.\n";
 	
@@ -155,6 +176,18 @@ void test_expressions(std::string filename) {
 
 	test_expr_parser("v1**3", "test4A", file);
 	test_expr_parser("v1**3.01","test4B", file);
+
+	test_expr_parser("v1**2 + v2**2 + v3***2", "test5A", file);
+	test_expr_parser("sqrt(v1)", "test5B", file);
+	test_expr_parser("sqrt(v1**2 + v2**2 + v3***2)", "test5C", file);
+	
+
+	//determinant 3x3 matice
+	test_expr_parser("cv1", "test6", file);
+	test_expr_parser("a[0,0]", "test6", file);
+	test_expr_parser("a[0,1]", "test6", file);
+	test_expr_parser("a[0,0]*a[1,1]*a[2,2]", "test6", file);
+	test_expr_parser("a[0,0]*a[1,1]*a[2,2] + a[0,1]*a[1,2]*a[2,0] + a[0,2]*a[1,0]*a[2,1] - a[2,0]*a[1,1]*a[0,2]-a[2,1]*a[1,2]*a[0,0]-a[2,2]*a[1,0]*a[0,1]", "test6A", file);
 }
 
 
