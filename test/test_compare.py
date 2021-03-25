@@ -11,24 +11,25 @@ import plotly.express as px
 if __name__ == "__main__":
 
     run_tests_switch = False
-    
+    n_repeats = 1000
     path = os.getcwd()
     path_parent = os.path.dirname(os.getcwd())
 
     num_of_test_runs = 5
+
     files = []
 
     for i in range(1, num_of_test_runs + 1):
         #BParser
         if run_tests_switch:
-            cporcess = subprocess.run(["./test_speed_parser_bin", f"test_parser{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
+            cporcess = subprocess.run(["./test_speed_parser_bin", f"test_parser{i}.csv", str(n_repeats)], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
             os.replace(os.path.join(path_parent, "build", f"test_parser{i}.csv"), os.path.join(path_parent, "test", f"test_parser{i}.csv"))
         
         files.append(os.path.join(path_parent, "test", f"test_parser{i}.csv"))
         
         #C++
         if run_tests_switch:
-            cporcess = subprocess.run(["./test_speed_cpp_bin", f"test_cpp{i}.csv"], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
+            cporcess = subprocess.run(["./test_speed_cpp_bin", f"test_cpp{i}.csv", str(n_repeats)], cwd=os.path.join(path_parent, "build"), )  # dokáže zavolat gcc nebo mělo by i make
             os.replace(os.path.join(path_parent, "build", f"test_cpp{i}.csv"), os.path.join(path_parent, "test", f"test_cpp{i}.csv"))
         
         files.append(os.path.join(path_parent, "test", f"test_cpp{i}.csv"))
