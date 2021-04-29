@@ -46,3 +46,5 @@ include/boost
 
 *.csv
 test/test.png
+test/*.s
+test/*.html
