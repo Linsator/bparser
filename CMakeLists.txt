@@ -197,7 +197,7 @@ macro(define_test src_name)
 
   # executable rule
   add_executable(${test_binary} EXCLUDE_FROM_ALL  ${test_source} )
-  set_target_properties(${test_binary} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
+  set_target_properties(${test_binary} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -save-temps")
   set(test_dependencies ${ARGN})
   if (test_dependencies) 
         add_dependencies(${test_binary} ${test_dependencies}) # all additional macro arguments are the test dependencies
