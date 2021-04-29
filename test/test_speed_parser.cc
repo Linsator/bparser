@@ -211,6 +211,12 @@ void test_expressions(std::string filename, int n_repeats) {
 
 	test_expr_parser("(cv1 * v3 * cv1 + v4) + (cv1 * v3 + cv1 + v4)", "test7L", file, n_repeats);
 	test_expr_parser("(cv1 * v3 * cv1 + v4) * (cv1 * v3 + cv1 + v4)", "test7M", file, n_repeats);
+	test_expr_parser("(cv1 * v3 * (cv1 + v4)) * (cv1 * v3 + cv1 + v4)", "test7N", file, n_repeats);
+
+
+	test_expr_parser("p1 = cv1 * v3;(p1 * cv1 + v4) + (p1 + cv1 + v4)", "test8A", file, n_repeats);
+	test_expr_parser("p1 = cv1 * v3;(p1 * cv1 + v4) * (p1 + cv1 + v4)", "test8B", file, n_repeats);
+	test_expr_parser("p1 = cv1 * v3;p2 = cv1 + v4;(p1 * p2) * (p1 + p2)", "test8C", file, n_repeats);
 
 
 }
