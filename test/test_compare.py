@@ -8,10 +8,16 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
+def ratio(g):
+    ratio = list(g['Time'])[0]/list(g['Time'])[1]
+    return ratio
+
+
+
 if __name__ == "__main__":
 
     run_tests_switch = False
-    n_repeats = 1000
+    n_repeats = 1000000
     path = os.getcwd()
     path_parent = os.path.dirname(os.getcwd())
 
@@ -44,15 +50,22 @@ if __name__ == "__main__":
     #data_sort_by_expressions_and_executor = data.sort_values(by=['Expression', 'Executor'])
 
     data_med = data.groupby(['Executor', 'ID', 'Expression'], as_index=False)['Time'].median()
-
+    ratio_df = pd.DataFrame(data_med).groupby(['ID', 'Expression']).apply(ratio)
+    ratio_df = pd.concat([ratio_df] * 2, ignore_index=True)
+    data_med['Ratio'] = ratio_df
+    data_med = data_med.sort_values(by=['Ratio'], ignore_index=True)
+    hover_d = "Ratio"
     title_string = "Expression by time execution for " + str(data['Repeats'].values[0]) + " repeats"
     #Figure
     fig = px.scatter(data_med, x="Time", y="Expression", color="Executor",
-                 title=title_string,
-                 labels={"Time":"Time (s)", "Expression":"Expressions"} # customize axis label
+                    hover_data=["Ratio"],
+                    title=title_string,
+                    labels={"Time":"Time (s)", "Expression":"Expressions"} # customize axis label
                 )
 
     fig.show()
+    fig.write_html("test_speed_table_results.html")
+
 
 
     #expresions = [x[0][1] for x in list_by_experesions]
