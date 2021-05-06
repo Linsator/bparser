@@ -260,13 +260,27 @@ void expr_test5B(ExprData &data) {
 			uint j = i_comp + 4*data.subset[i];
 			for(uint k = 0; k<4; k++) {
 				double v1 = data.v1[j+k];
-				data.vres[j+k] = sqrt(v1);
+				double v2 = data.v2[j+k];
+				double v3 = data.v3[j+k];
+				data.vres[j+k] = v1*v1 + v2*v2 + v3*v3;
 			}
 		}
 	}
 }
 
 void expr_test5C(ExprData &data) {
+	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
+		for(uint i=0; i<data.vec_size/4; ++i) {
+			uint j = i_comp + 4*data.subset[i];
+			for(uint k = 0; k<4; k++) {
+				double v1 = data.v1[j+k];
+				data.vres[j+k] = sqrt(v1);
+			}
+		}
+	}
+}
+
+void expr_test5D(ExprData &data) {
 	for(uint i_comp=0; i_comp < 3*data.vec_size; i_comp += data.vec_size) {
 		for(uint i=0; i<data.vec_size/4; ++i) {
 			uint j = i_comp + 4*data.subset[i];
@@ -522,9 +536,9 @@ void test_expressions(std::string filename, uint n_repeats) {
 	test_expr_cpp("v1**3.01", expr_test4B,"test4B", file, n_repeats);
 
 	test_expr_cpp("v1**2 + v2**2 + v3**2", expr_test5A, "test5A", file, n_repeats);
-	test_expr_cpp("v1*v1 + v2*v2 + v3*v3", expr_test5A, "test5A", file, n_repeats);
-	test_expr_cpp("sqrt(v1)", expr_test5B, "test5B", file, n_repeats);
-	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5C, "test5C", file, n_repeats);
+	test_expr_cpp("v1*v1 + v2*v2 + v3*v3", expr_test5B, "test5B", file, n_repeats);
+	test_expr_cpp("sqrt(v1)", expr_test5C, "test5C", file, n_repeats);
+	test_expr_cpp("sqrt(v1**2 + v2**2 + v3**2)", expr_test5D, "test5D", file, n_repeats);
 
 	//matrix
 

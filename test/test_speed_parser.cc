@@ -179,8 +179,9 @@ void test_expressions(std::string filename, int n_repeats) {
 	test_expr_parser("v1**3.01","test4B", file, n_repeats);
 
 	test_expr_parser("v1**2 + v2**2 + v3**2", "test5A", file, n_repeats);
-	test_expr_parser("sqrt(v1)", "test5B", file, n_repeats);
-	test_expr_parser("sqrt(v1**2 + v2**2 + v3**2)", "test5C", file, n_repeats);
+	test_expr_parser("v1*v1 + v2*v2 + v3*v3", "test5B", file, n_repeats);
+	test_expr_parser("sqrt(v1)", "test5C", file, n_repeats);
+	test_expr_parser("sqrt(v1**2 + v2**2 + v3**2)", "test5D", file, n_repeats);
 	
 
 	//determinant 3x3 matice
