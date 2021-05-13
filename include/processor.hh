@@ -17,8 +17,11 @@
 #include "expression_dag.hh"
 #include "scalar_node.hh"
 
+#include <asmjit/x86.h>
+
 namespace bparser {
 using namespace details;
+using namespace asmjit;
 
 /**
  *
@@ -123,6 +126,17 @@ using namespace details;
 //	double *next_slot_;
 //};
 
+struct JitGlobal {
+  	JitRuntime runtime;
+
+	CodeHolder code;            // Holds code and relocation information.
+	Error err;					// Error info for JIT.
+	x86::Compiler cc;			// Create x86::Compiler.
+
+};
+static JitGlobal jitGlobal;
+x86::Gp valsPtr; // měl by ukazovat na workspakce.vector
+
 const uint simd_size = 4;
 typedef double double4 __attribute__((__vector_size__(32)));
 
@@ -159,6 +173,10 @@ struct Workspace {
 	uint *const_subset;
 	uint *vec_subset;
 
+	inline uint32_t get_offset(uint vec_idx, uint subset_idx)
+	{
+		return (vector_size * vec_idx + subset_idx) * sizeof(Vec);
+	}
 };
 
 
@@ -183,12 +201,20 @@ struct EvalImpl;
 template <class T>
 struct EvalImpl<1, T> {
 	inline static void eval(Operation op,  Workspace &w) {
-		Vec v0 = w.vector[op.arg[0]];
+		//Vec v0 = w.vector[op.arg[0]];
+		x86::Ymm r0 = jitGlobal.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
+			uint32_t offset0 = w.get_offset(op.arg[0],i);
+
+			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
+
+			T::jit(jitGlobal.cc, r0)
+			/*
 			double4 * v0i = v0.value(i);
 			for(uint j=0; j<simd_size; ++j) {
 				T::eval((*v0i)[j]);
 			}
+			*/
 		}
 	}
 };
@@ -197,14 +223,27 @@ struct EvalImpl<1, T> {
 template <class T>
 struct EvalImpl<2, T> {
 	inline static void eval(Operation op,  Workspace &w) {
+		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
+		*/
+		x86::Ymm r0 = jitGlobal.cc.newYmm();
+		x86::Ymm r1 = jitGlobal.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
+			uint32_t offset0 = w.get_offset(op.arg[0],i);
+			uint32_t offset1 = w.get_offset(op.arg[1],i);
+
+			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
+			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
+
+			T::jit(jitGlobal.cc, r0, r1)
+			/*
 			double4 * v0i = v0.value(i);
 			double4 * v1i = v1.value(i);
 			for(uint j=0; j<simd_size; ++j) {
 				T::eval((*v0i)[j], (*v1i)[j]);
 			}
+			*/
 		}
 	}
 };
@@ -213,18 +252,34 @@ struct EvalImpl<2, T> {
 template <class T>
 struct EvalImpl<3, T> {
 	inline static void eval(Operation op,  Workspace &w) {
+		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
 		Vec v2 = w.vector[op.arg[2]];
+		*/
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
+		x86::Ymm r0 = jitGlobal.cc.newYmm();
+		x86::Ymm r1 = jitGlobal.cc.newYmm();
+		x86::Ymm r2 = jitGlobal.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
+			uint32_t offset0 = w.get_offset(op.arg[0],i);
+			uint32_t offset1 = w.get_offset(op.arg[1],i);
+			uint32_t offset2 = w.get_offset(op.arg[2],i);
+
+			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
+			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
+			r2 = x86::ptr(valsPtr, offset2, sizeof(double4));
+
+			T::jit(jitGlobal.cc, r0, r1, r2)
+		/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
 			double4 *v2i = v2.value(i);
 			for(uint j=0; j<simd_size; ++j)
 				T::eval((*v0i)[j], (*v1i)[j], (*v2i)[j]);
+		*/
 		}
 	}
 };
@@ -232,20 +287,43 @@ struct EvalImpl<3, T> {
 template <class T>
 struct EvalImpl<4, T> {
 	inline static void eval(Operation op,  Workspace &w) {
+		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
 		Vec v2 = w.vector[op.arg[2]];
 		Vec v3 = w.vector[op.arg[3]];
+		*/
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
+		x86::Ymm r0 = jitGlobal.cc.newYmm();
+		x86::Ymm r1 = jitGlobal.cc.newYmm();
+		x86::Ymm r2 = jitGlobal.cc.newYmm();
+		x86::Ymm r3 = jitGlobal.cc.newYmm();
+
+		
+
 		for(uint i=0; i<w.subset_size; ++i) {
+			uint32_t offset0 = w.get_offset(op.arg[0],i);
+			uint32_t offset1 = w.get_offset(op.arg[1],i);
+			uint32_t offset2 = w.get_offset(op.arg[2],i);
+			uint32_t offset3 = w.get_offset(op.arg[3],i);
+
+			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
+			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
+			r2 = x86::ptr(valsPtr, offset2, sizeof(double4));
+			r3 = x86::ptr(valsPtr, offset3, sizeof(double4));
+
+			T::jit(jitGlobal.cc, r0, r1, r2, r3)
+			/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
 			double4 *v2i = v2.value(i);
 			double4 *v3i = v3.value(i);
+			
 			for(uint j=0; j<simd_size; ++j)
 				T::eval((*v0i)[j], (*v1i)[j], (*v2i)[j], (*v3i)[j]);
+			*/
 		}
 	}
 };
@@ -290,8 +368,13 @@ struct Processor {
 		return create_processor_(se, vector_size);
 	}
 
-
+	// ? tady by mohlo stačit vytvořit Runtime, CodeHolder a Compilator
+	// ? můžná bude potřeba Globální a statickej Runtime, nebo ho definovat jinde
 	static Processor *create_processor_(ExpressionDAG &se, uint vector_size) {
+
+    	jitGlobal.code.init(jitGlobal.runtime.environment());     	// Initialize code to match the JIT environment.
+		jitGlobal.code.attach(&jitGlobal.cc);						// attach x86::Compiler to code.
+
 		vector_size = (vector_size / simd_size) * simd_size;
 		uint simd_bytes = sizeof(double) * simd_size;
 		ExpressionDAG::NodeVec & sorted_nodes = se.sort_nodes();
@@ -348,12 +431,8 @@ struct Processor {
 	    auto sorted_nodes = se.sort_nodes();
 		uint n_operations = sorted_nodes.size();
 		program_ = (Operation *) arena_.allocate(sizeof(Operation) * n_operations);
-
-		/**
-		 * TODO separate setup of workspace - no dependence on the order
-		 * from composition of operations - top sort but no dep. on result_idx_
-		 */
 		Operation *op = program_;
+
 		for(auto it=sorted_nodes.rbegin(); it != sorted_nodes.rend(); ++it) {
 			//se._print_node(*it);
 			ScalarNode * node = *it;
@@ -406,7 +485,7 @@ struct Processor {
 	~Processor() {
 		arena_.destroy();
 	}
-
+	// ? sem nejspíš přidat switch který podle op_code přidá do &code instrukce na provedení požadovaný operace
 	Operation make_operation(ScalarNode * node) {
 		Operation op = {(unsigned char)0xff, {0,0,0}}  ;
 		op.code = node->op_code_;
