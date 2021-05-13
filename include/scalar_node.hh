@@ -15,7 +15,7 @@
 #include "config.hh"
 #include "assert.hh"
 
-
+#include <asmjit/x86.h>
 
 namespace bparser {
 namespace details {
@@ -219,6 +219,9 @@ struct _add_ : public ScalarNode {
 		// std::cout << a << " + " << b << "\n";
 		res = a + b;
 	}
+	static void jit(x86::Compiler cc , x86::Ymm res, x86::Ymm a, x86::Ymm b){
+		cc.vaddpd(res, a, b);
+	}
 };
 
 struct _sub_ : public ScalarNode {
@@ -227,6 +230,9 @@ struct _sub_ : public ScalarNode {
 	inline static void eval(double &res, double a, double b) {
 		// std::cout << a << " - " << b << "\n";
  		res = a - b;
+	}
+	static void jit(x86::Compiler cc , x86::Ymm res, x86::Ymm a, x86::Ymm b){
+		cc.vsubpd(res, a, b);
 	}
 };
 
@@ -237,6 +243,9 @@ struct _mul_ : public ScalarNode {
 	inline static void eval(double &res, double a, double b) {
 		// std::cout << a << " * " << b << "\n";
 		res = a * b;
+	}
+	static void jit(x86::Compiler cc , x86::Ymm res, x86::Ymm a, x86::Ymm b){
+		cc.vmulpd(res, a, b);
 	}
 };
 
