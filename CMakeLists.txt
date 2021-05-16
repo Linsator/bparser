@@ -5,14 +5,13 @@ message(STATUS "CMakeLists.txt - BParser")
 
 set(CMAKE_CXX_FLAGS     "-std=c++11 -pedantic-errors -Werror=pedantic -Wall -Wextra -Werror -Wno-long-long -Wno-strict-aliasing -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION")
 #set(CMAKE_CXX_FLAGS     "-std=c++11 -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mavx2")
-set(CMAKE_CXX_FLAGS_DEBUG   "-g -DDEBUG")  #-fsanitize=address -static-libasan  -fno-omit-frame-pointer
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mavx2 -lasmjit -DASMJIT_STATIC")
+set(CMAKE_CXX_FLAGS_DEBUG   "-g -DDEBUG -lasmjit -DASMJIT_STATIC")  #-fsanitize=address -static-libasan  -fno-omit-frame-pointer
 
 #ASAN_OPT         := -g -fsanitize=address -static-libasan -fno-omit-frame-pointer
 #MSAN_OPT         := -g -fsanitize=memory    -fno-omit-frame-pointer
 #LSAN_OPT         := -g -fsanitize=leak      -fno-omit-frame-pointer
 #USAN_OPT         := -g -fsanitize=undefined -fno-omit-frame-pointer
-
 
 # Set a default build type if none was specified
 set(default_build_type "Release")
@@ -155,6 +154,7 @@ message(STATUS "=======================================================\n\n")
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIR}
+    
 )
 
 # add tager for libbparser
@@ -225,3 +225,4 @@ define_test(test_processor)
 define_test(test_speed bparser)
 define_test(test_speed_cpp bparser)
 define_test(test_speed_parser bparser)
+define_test(test_jit bparser)
