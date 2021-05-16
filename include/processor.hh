@@ -8,6 +8,7 @@
 #ifndef INCLUDE_PROCESSOR_HH_
 #define INCLUDE_PROCESSOR_HH_
 
+
 #include <stdint.h>
 #include <malloc.h>
 #include <vector>
@@ -126,17 +127,6 @@ using namespace asmjit;
 //	double *next_slot_;
 //};
 
-struct JitGlobal {
-  	JitRuntime runtime;
-
-	CodeHolder code;            // Holds code and relocation information.
-	Error err;					// Error info for JIT.
-	x86::Compiler cc;			// Create x86::Compiler.
-
-};
-static JitGlobal jitGlobal;
-x86::Gp valsPtr; // měl by ukazovat na workspakce.vector
-
 const uint simd_size = 4;
 typedef double double4 __attribute__((__vector_size__(32)));
 
@@ -164,20 +154,40 @@ struct Vec {
  * Processor's storage.
  */
 struct Workspace {
-	uint vector_size;
+	uint vector_size;	// pocet prvku ve vectoru / 4
 
 	// Array of vectors. Temporaries, input vectors and result vectors.
 	Vec *vector;
 
-	uint subset_size;
-	uint *const_subset;
-	uint *vec_subset;
+	uint subset_size;	// velikost masky 
+	uint *const_subset;	// maska na konstanty
+	uint *vec_subset;	// maska na vector
 
-	inline uint32_t get_offset(uint vec_idx, uint subset_idx)
+	inline uintptr_t get_offset(uint vec_idx, uint subset_idx)
 	{
-		return (vector_size * vec_idx + subset_idx) * sizeof(Vec);
+		return (uintptr_t)&(vector[vec_idx].values[vector[vec_idx].subset[subset_idx]]) - (uintptr_t)&(*vector);
 	}
 };
+
+struct JitGlobal {
+  JitRuntime runtime;
+};
+static JitGlobal jitGlobal;
+
+struct JitStruct {
+	CodeHolder code;            // Holds code and relocation information.
+	x86::Compiler cc;			// x86::Compiler.
+
+	x86::Compiler *cc_ptr = &cc; // pointer to Compiler to be able to pass it as argument to jit() functions
+	x86::Gp valsPtr; // měl by ukazovat na workspakce.vector
+
+	JitStruct();
+	~JitStruct();
+};
+
+typedef void (*FuncType) (Vec* valsPtr);
+
+
 
 
 /**
@@ -200,15 +210,18 @@ struct EvalImpl;
 
 template <class T>
 struct EvalImpl<1, T> {
-	inline static void eval(Operation op,  Workspace &w) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
 		//Vec v0 = w.vector[op.arg[0]];
-		x86::Ymm r0 = jitGlobal.cc.newYmm();
+		x86::Ymm r0 = jitStruct.cc.newYmm();
+
 		for(uint i=0; i<w.subset_size; ++i) {
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 
-			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
+			
+			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
 
-			T::jit(jitGlobal.cc, r0)
+			T::jit(jitStruct.cc_ptr, r0);
+			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			for(uint j=0; j<simd_size; ++j) {
@@ -222,21 +235,22 @@ struct EvalImpl<1, T> {
 
 template <class T>
 struct EvalImpl<2, T> {
-	inline static void eval(Operation op,  Workspace &w) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
 		*/
-		x86::Ymm r0 = jitGlobal.cc.newYmm();
-		x86::Ymm r1 = jitGlobal.cc.newYmm();
+		x86::Ymm r0 = jitStruct.cc.newYmm();
+		x86::Ymm r1 = jitStruct.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 			uint32_t offset1 = w.get_offset(op.arg[1],i);
 
-			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
-			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
+			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
+			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	//ekvivalent v1.value(i);
 
-			T::jit(jitGlobal.cc, r0, r1)
+			T::jit(jitStruct.cc_ptr, r0, r1);
+			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			double4 * v1i = v1.value(i);
@@ -251,7 +265,7 @@ struct EvalImpl<2, T> {
 
 template <class T>
 struct EvalImpl<3, T> {
-	inline static void eval(Operation op,  Workspace &w) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
@@ -260,19 +274,24 @@ struct EvalImpl<3, T> {
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
-		x86::Ymm r0 = jitGlobal.cc.newYmm();
-		x86::Ymm r1 = jitGlobal.cc.newYmm();
-		x86::Ymm r2 = jitGlobal.cc.newYmm();
+		x86::Ymm r0 = jitStruct.cc.newYmm();
+		x86::Ymm r1 = jitStruct.cc.newYmm();
+		x86::Ymm r2 = jitStruct.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
+			// získá offset pamětí
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 			uint32_t offset1 = w.get_offset(op.arg[1],i);
 			uint32_t offset2 = w.get_offset(op.arg[2],i);
 
-			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
-			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
-			r2 = x86::ptr(valsPtr, offset2, sizeof(double4));
+			// přesune hodnoty do registrů
+			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));
+			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	
+			jitStruct.cc.vmovapd(r2, x86::ptr(jitStruct.valsPtr, offset2, sizeof(double4)));
 
-			T::jit(jitGlobal.cc, r0, r1, r2)
+			T::jit(jitStruct.cc_ptr, r0, r1, r2);
+
+			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
+
 		/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
@@ -284,9 +303,10 @@ struct EvalImpl<3, T> {
 	}
 };
 
+
 template <class T>
 struct EvalImpl<4, T> {
-	inline static void eval(Operation op,  Workspace &w) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
@@ -296,10 +316,10 @@ struct EvalImpl<4, T> {
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
-		x86::Ymm r0 = jitGlobal.cc.newYmm();
-		x86::Ymm r1 = jitGlobal.cc.newYmm();
-		x86::Ymm r2 = jitGlobal.cc.newYmm();
-		x86::Ymm r3 = jitGlobal.cc.newYmm();
+		x86::Ymm r0 = jitStruct.cc.newYmm();
+		x86::Ymm r1 = jitStruct.cc.newYmm();
+		x86::Ymm r2 = jitStruct.cc.newYmm();
+		x86::Ymm r3 = jitStruct.cc.newYmm();
 
 		
 
@@ -309,12 +329,14 @@ struct EvalImpl<4, T> {
 			uint32_t offset2 = w.get_offset(op.arg[2],i);
 			uint32_t offset3 = w.get_offset(op.arg[3],i);
 
-			r0 = x86::ptr(valsPtr, offset0, sizeof(double4));	// přiřadí registru ukazatel na 
-			r1 = x86::ptr(valsPtr, offset1, sizeof(double4));	//ekvivalent v1.value(i);
-			r2 = x86::ptr(valsPtr, offset2, sizeof(double4));
-			r3 = x86::ptr(valsPtr, offset3, sizeof(double4));
+			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
+			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	//ekvivalent v1.value(i);
+			jitStruct.cc.vmovapd(r2, x86::ptr(jitStruct.valsPtr, offset2, sizeof(double4)));
+			jitStruct.cc.vmovapd(r3, x86::ptr(jitStruct.valsPtr, offset3, sizeof(double4)));
 
-			T::jit(jitGlobal.cc, r0, r1, r2, r3)
+			T::jit(jitStruct.cc_ptr, r0, r1, r2, r3);
+
+			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
@@ -368,12 +390,8 @@ struct Processor {
 		return create_processor_(se, vector_size);
 	}
 
-	// ? tady by mohlo stačit vytvořit Runtime, CodeHolder a Compilator
-	// ? můžná bude potřeba Globální a statickej Runtime, nebo ho definovat jinde
-	static Processor *create_processor_(ExpressionDAG &se, uint vector_size) {
 
-    	jitGlobal.code.init(jitGlobal.runtime.environment());     	// Initialize code to match the JIT environment.
-		jitGlobal.code.attach(&jitGlobal.cc);						// attach x86::Compiler to code.
+	static Processor *create_processor_(ExpressionDAG &se, uint vector_size) {
 
 		vector_size = (vector_size / simd_size) * simd_size;
 		uint simd_bytes = sizeof(double) * simd_size;
@@ -401,6 +419,12 @@ struct Processor {
 	Processor(ArenaAlloc arena, ExpressionDAG &se, uint vec_size)
 	: arena_(arena)
 	{
+
+    	jitStruct.code.init(jitGlobal.runtime.environment());     	// Initialize code to match the JIT environment.
+		jitStruct.code.attach(&jitStruct.cc);						// attach x86::Compiler to code.
+
+
+
 		workspace_.vector_size = vec_size;
 		workspace_.subset_size = 0;
 		workspace_.const_subset = arena_.create_array<uint>(vec_size);
@@ -474,7 +498,9 @@ struct Processor {
 		}
 		op->code = ScalarNode::terminate_op_code;
 
-
+		jit();
+		run();
+		release();
 	}
 
 	void vec_set(uint ivec, double4 * v, uint * s) {
@@ -500,10 +526,16 @@ struct Processor {
 
 	template<class T>
 	inline void operation_eval(Operation op) {
-		EvalImpl<T::n_eval_args, T>::eval(op, workspace_);
+		EvalImpl<T::n_eval_args, T>::eval(op, workspace_, jitStruct);
 	}
+	
+	FuncType jit() {
+		jitStruct.cc.addFunc(FuncSignatureT<void, Vec*>());	// nejsme si jistej možná bude potřeba tomu dát že to bude mít jiný argumenty
+		jitStruct.cc.func()->frame().setAvxEnabled();
 
-	void run() {
+
+		jitStruct.valsPtr = jitStruct.cc.newIntPtr("valsPtr"); // "valsPrt" je název argumnetu který jde do funkce, kterou tenhle jit vytvoří
+		jitStruct.cc.setArg(0, jitStruct.valsPtr);
 		for(Operation * op = program_;;++op) {
 //			std::cout << "op: " << (int)(op->code)
 //					<< " ia0: " << (int)(op->arg[0])
@@ -527,6 +559,7 @@ struct Processor {
 			CODE(_neg_);
 			CODE(_or_);
 			CODE(_and_);
+			
 			CODE(_abs_);
 			CODE(_sqrt_);
 			CODE(_exp_);
@@ -543,6 +576,7 @@ struct Processor {
 			CODE(_atan_);
 			CODE(_ceil_);
 			CODE(_floor_);
+			
 			CODE(_isnan_);
 			CODE(_isinf_);
 			CODE(_sgn_);
@@ -566,11 +600,26 @@ struct Processor {
 //			CODE(__);
 //			CODE(__);
 //			CODE(__);
-			case (ScalarNode::terminate_op_code): return; // terminal operation
+			case (ScalarNode::terminate_op_code): break; // terminal operation
 			}
 		}
+		jitStruct.cc.endFunc();
+		jitStruct.cc.finalize();
+		
+		jitGlobal.runtime.add(&fn, &jitStruct.code);
+
+		return fn;
 	}
 
+	void run()
+	{
+		fn(workspace_.vector);
+	}
+
+	void release()
+	{
+		jitGlobal.runtime.release(fn);
+	}
 	// Set subset indices of active double4 blocks.
 	// TODO: Provide getter for pointer to the workspace subset in order to
 	// fill it (some where), can be passed together with fixed size as std::span
@@ -589,6 +638,12 @@ struct Processor {
 	ArenaAlloc arena_;
 	Workspace workspace_;
 	Operation * program_;
+
+	JitStruct jitStruct;
+
+
+	FuncType fn;
+
 };
 
 
