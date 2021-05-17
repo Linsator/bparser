@@ -499,8 +499,6 @@ struct Processor {
 		op->code = ScalarNode::terminate_op_code;
 
 		jit();
-		run();
-		release();
 	}
 
 	void vec_set(uint ivec, double4 * v, uint * s) {
@@ -529,7 +527,7 @@ struct Processor {
 		EvalImpl<T::n_eval_args, T>::eval(op, workspace_, jitStruct);
 	}
 	
-	FuncType jit() {
+	void jit() {
 		jitStruct.cc.addFunc(FuncSignatureT<void, Vec*>());	// nejsme si jistej možná bude potřeba tomu dát že to bude mít jiný argumenty
 		jitStruct.cc.func()->frame().setAvxEnabled();
 
@@ -608,7 +606,7 @@ struct Processor {
 		
 		jitGlobal.runtime.add(&fn, &jitStruct.code);
 
-		return fn;
+		return;
 	}
 
 	void run()
