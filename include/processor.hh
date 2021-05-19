@@ -224,13 +224,15 @@ struct EvalImpl<1, T> {
 		x86::Ymm r0 = jitStruct.cc.newYmm();
 
 		for(uint i=0; i<w.subset_size; ++i) {
+			/*
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 
-			
 			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
+			*/
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
+			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
 			T::jit(jitStruct.cc_ptr, r0);
-			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
+			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			for(uint j=0; j<simd_size; ++j) {
@@ -252,14 +254,18 @@ struct EvalImpl<2, T> {
 		x86::Ymm r0 = jitStruct.cc.newYmm();
 		x86::Ymm r1 = jitStruct.cc.newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
+			/*
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 			uint32_t offset1 = w.get_offset(op.arg[1],i);
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
 			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
 			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	//ekvivalent v1.value(i);
 
+			*/
+			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			jitStruct.cc.vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
 			T::jit(jitStruct.cc_ptr, r0, r1);
-			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
+			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			double4 * v1i = v1.value(i);
@@ -339,6 +345,7 @@ struct EvalImpl<4, T> {
 		
 
 		for(uint i=0; i<w.subset_size; ++i) {
+			/*
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
 			uint32_t offset1 = w.get_offset(op.arg[1],i);
 			uint32_t offset2 = w.get_offset(op.arg[2],i);
@@ -349,9 +356,14 @@ struct EvalImpl<4, T> {
 			jitStruct.cc.vmovapd(r2, x86::ptr(jitStruct.valsPtr, offset2, sizeof(double4)));
 			jitStruct.cc.vmovapd(r3, x86::ptr(jitStruct.valsPtr, offset3, sizeof(double4)));
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
+			*/
+			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			jitStruct.cc.vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
+			jitStruct.cc.vmovapd(r2, x86::ptr(w.get_ptr(op.arg[2],i), sizeof(double4)));
+			jitStruct.cc.vmovapd(r3, x86::ptr(w.get_ptr(op.arg[3],i), sizeof(double4)));
 			T::jit(jitStruct.cc_ptr, r0, r1, r2, r3);
 
-			jitStruct.cc.vmovapd(x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)), r0);	//zpět zápis do paměti
+			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4) ), r0);
 			/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
@@ -631,6 +643,7 @@ struct Processor {
 
 	void jit(){
 		fn = _jit();
+
 	}
 
 	void run()
