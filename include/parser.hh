@@ -178,6 +178,14 @@ public:
     	processor->set_subset(subset);
     }
 
+    void jit() {
+        processor->jit();
+    }
+
+    void release(){
+        processor->release();
+    }
+
     void run() {
     	processor->run();
     }

@@ -97,10 +97,14 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	//std::cout << "vres: " << vres << ", " << vres + block_size << ", " << vres + 2*vec_size << "\n";
 	//std::cout << "Symbols: " << print_vector(p.symbols()) << "\n";
 	//std::cout.flush();
+
 	p.compile();
 
 	std::vector<uint> ss = std::vector<uint>(data1.subset, data1.subset+vec_size/4);
 	p.set_subset(ss);
+
+	p.jit();
+	
 	auto start_time = std::chrono::high_resolution_clock::now();
 	for(uint i_rep=0; i_rep < n_repeats; i_rep++) {
 		p.run();
@@ -108,7 +112,7 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	auto end_time = std::chrono::high_resolution_clock::now();
 	double parser_time  =
 			std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time).count();
-
+	//p.release();
 	/*
 	for(int i = 0; i<3*1024; i++)
 	{
@@ -160,8 +164,10 @@ void test_expressions(std::string filename, int n_repeats) {
 
 	std::cout << "Starting tests with BParser.\n";
 	
-	test_expr_parser("v1 + v2", "test0A", file, n_repeats);
-
+	test_expr_parser("v1 * v2", "test2", file, n_repeats);
+	//test_expr_parser("v1 + v2", "test1", file, n_repeats);
+//	test_expr_parser("v1 + v2 + v3", "test3", file, n_repeats);
+	//test_expr_parser("v1 * v2 + v3 + v4", "test4", file, n_repeats);
 
 }
 

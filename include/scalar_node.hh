@@ -215,7 +215,9 @@ struct _minus_ : public ScalarNode {
 	inline static void eval(double &res, double a) {
 		res = -a;
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 
@@ -227,7 +229,7 @@ struct _add_ : public ScalarNode {
 		res = a + b;
 	}
 	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
-		cc->vaddpd(res, a, b);
+		cc->vaddpd(res, a, b); 
 	}
 };
 
@@ -262,7 +264,9 @@ struct _div_ : public ScalarNode {
 	inline static void eval(double &res, double a, double b) {
 		res = a / b;
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _mod_ : public ScalarNode {
@@ -272,7 +276,9 @@ struct _mod_ : public ScalarNode {
 		// TODO: vectorize
 		res = std::fmod(a, b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _eq_ : public ScalarNode {
@@ -282,7 +288,9 @@ struct _eq_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(a == b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _ne_ : public ScalarNode {
@@ -292,7 +300,9 @@ struct _ne_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(a != b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 
@@ -303,7 +313,9 @@ struct _lt_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(a < b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _le_ : public ScalarNode {
@@ -313,7 +325,9 @@ struct _le_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(a <= b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _neg_ : public ScalarNode {
@@ -323,7 +337,9 @@ struct _neg_ : public ScalarNode {
 		// TODO: vectorize
 		res =  (a == double_true()) ? double_false() : double_true();		// we use bit masks for bool values
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 
@@ -334,7 +350,9 @@ struct _or_ : public ScalarNode {
 		// TODO: vectorize
 		res = mask_to_double( double_to_mask(a) | double_to_mask(b));	// we use bit masks for bool values
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _and_ : public ScalarNode {
@@ -344,7 +362,9 @@ struct _and_ : public ScalarNode {
 		// TODO: vectorize
 		res = mask_to_double( double_to_mask(a) & double_to_mask(b));	// we use bit masks for bool values
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 
@@ -400,7 +420,9 @@ struct _isnan_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(std::isnan(a));
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 struct _isinf_ : public ScalarNode {
@@ -410,7 +432,9 @@ struct _isinf_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_bool(std::isinf(a));
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 struct _sgn_ : public ScalarNode {
@@ -420,7 +444,9 @@ struct _sgn_ : public ScalarNode {
 		// TODO: vectorize
 		res =  a > 0 ? 1.0 : (a < 0 ? -1.0 : 0.0);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 struct _atan2_ : public ScalarNode {
@@ -430,7 +456,9 @@ struct _atan2_ : public ScalarNode {
 		// TODO: vectorize
 		res =  atan2(a, b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _pow_ : public ScalarNode {
@@ -440,7 +468,9 @@ struct _pow_ : public ScalarNode {
 		// TODO: vectorize
 		res =  pow(a, b);
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _max_ : public ScalarNode {
@@ -451,7 +481,9 @@ struct _max_ : public ScalarNode {
 		//std::cout << "max " << a << "," << b << "\n";
 		res =  (a>b) ? a : b;
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 struct _min_ : public ScalarNode {
@@ -462,7 +494,9 @@ struct _min_ : public ScalarNode {
 		//std::cout << "min " << a << "," << b << "\n";
 		res =  (a>b) ? b : a;
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b){
+		cc->vmulpd(res, a, b);	// špatně
+	}
 };
 
 //struct _iadd_ : public ScalarNode {
@@ -493,7 +527,9 @@ struct _copy_ : public ScalarNode {
 		res = a;
 		//std::cout << a << " -copy-> " << res << "\n";
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a){
+		cc->vmovapd(res, a); 	// špatně
+	}
 };
 
 
@@ -504,7 +540,11 @@ struct _ifelse_ : public ScalarNode {
 		// TODO: vectorize
 		res = double_to_mask(b) ? a : c;	// we use bit masks for bool values
 	}
-	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b, asmjit::x86::Ymm c);
+	static void jit(asmjit::x86::Compiler *cc , asmjit::x86::Ymm res, asmjit::x86::Ymm a, asmjit::x86::Ymm b, asmjit::x86::Ymm c)
+	{
+		cc->vmulpd(c, a, b);	// špatně
+		cc->vmulpd(res, a, c);	// špatně
+	}
 };
 
 
