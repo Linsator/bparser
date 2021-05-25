@@ -544,6 +544,7 @@ struct Processor {
 
 	~Processor() {
 		//jitStruct.~JitStruct();
+		release();
 		delete jitStruct;
 		arena_.destroy();
 	}
