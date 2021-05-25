@@ -180,18 +180,28 @@ struct Workspace {
 struct JitGlobal {
   JitRuntime runtime;
 };
-static JitGlobal jitGlobal;
+//static JitGlobal jitGlobal;
 
 struct JitStruct {
 	CodeHolder code;            // Holds code and relocation information.
 	StringLogger logger; 
-	x86::Compiler cc;			// x86::Compiler.
+	JitRuntime runtime;
+	//x86::Compiler cc;			// x86::Compiler.
+	//x86::Compiler *cc_ptr = &cc; // pointer to Compiler to be able to pass it as argument to jit() functions
 
-	x86::Compiler *cc_ptr = &cc; // pointer to Compiler to be able to pass it as argument to jit() functions
+	x86::Compiler *cc_ptr;
+
 	x86::Gp valsPtr; // měl by ukazovat na workspakce.vector
 
-	//JitStruct();
-	//~JitStruct();
+	JitStruct(){
+		cc_ptr = new x86::Compiler();
+	}
+	~JitStruct(){
+		delete cc_ptr;
+		//cc.~Compiler();
+		//code.~CodeHolder();
+		//logger.~StringLogger();
+	}
 };
 
 typedef void (*FuncType) (Vec* valsPtr);
@@ -219,9 +229,10 @@ struct EvalImpl;
 
 template <class T>
 struct EvalImpl<1, T> {
-	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct * jitStruct) {
 		//Vec v0 = w.vector[op.arg[0]];
-		x86::Ymm r0 = jitStruct.cc.newYmm();
+		x86::Ymm r0 = jitStruct->cc_ptr->newYmm();
+
 
 		for(uint i=0; i<w.subset_size; ++i) {
 			/*
@@ -230,9 +241,9 @@ struct EvalImpl<1, T> {
 			jitStruct.cc.vmovapd(r0, x86::ptr(jitStruct.valsPtr, offset0, sizeof(double4)));	// přiřadí registru ukazatel na 
 			*/
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
-			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
-			T::jit(jitStruct.cc_ptr, r0);
-			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
+			jitStruct->cc_ptr->vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			T::jit(jitStruct->cc_ptr, r0);
+			jitStruct->cc_ptr->vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			for(uint j=0; j<simd_size; ++j) {
@@ -246,13 +257,13 @@ struct EvalImpl<1, T> {
 
 template <class T>
 struct EvalImpl<2, T> {
-	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct * jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
 		*/
-		x86::Ymm r0 = jitStruct.cc.newYmm();
-		x86::Ymm r1 = jitStruct.cc.newYmm();
+		x86::Ymm r0 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r1 = jitStruct->cc_ptr->newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
 			/*
 			uint32_t offset0 = w.get_offset(op.arg[0],i);
@@ -262,10 +273,10 @@ struct EvalImpl<2, T> {
 			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	//ekvivalent v1.value(i);
 
 			*/
-			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
-			jitStruct.cc.vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
-			T::jit(jitStruct.cc_ptr, r0, r1);
-			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
+			jitStruct->cc_ptr->vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			jitStruct->cc_ptr->vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
+			T::jit(jitStruct->cc_ptr, r0, r1);
+			jitStruct->cc_ptr->vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)), r0);	//zpět zápis do paměti
 			/*
 			double4 * v0i = v0.value(i);
 			double4 * v1i = v1.value(i);
@@ -280,7 +291,7 @@ struct EvalImpl<2, T> {
 
 template <class T>
 struct EvalImpl<3, T> {
-	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct * jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
@@ -289,9 +300,9 @@ struct EvalImpl<3, T> {
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
-		x86::Ymm r0 = jitStruct.cc.newYmm();
-		x86::Ymm r1 = jitStruct.cc.newYmm();
-		x86::Ymm r2 = jitStruct.cc.newYmm();
+		x86::Ymm r0 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r1 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r2 = jitStruct->cc_ptr->newYmm();
 		for(uint i=0; i<w.subset_size; ++i) {
 			// získá offset pamětí
 			/*
@@ -305,13 +316,13 @@ struct EvalImpl<3, T> {
 			jitStruct.cc.vmovapd(r1, x86::ptr(jitStruct.valsPtr, offset1, sizeof(double4)));	
 			jitStruct.cc.vmovapd(r2, x86::ptr(jitStruct.valsPtr, offset2, sizeof(double4)));
 			*/
-			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
-			jitStruct.cc.vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
-			jitStruct.cc.vmovapd(r2, x86::ptr(w.get_ptr(op.arg[2],i), sizeof(double4)));
+			jitStruct->cc_ptr->vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			jitStruct->cc_ptr->vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
+			jitStruct->cc_ptr->vmovapd(r2, x86::ptr(w.get_ptr(op.arg[2],i), sizeof(double4)));
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
-			T::jit(jitStruct.cc_ptr, r0, r1, r2);
+			T::jit(jitStruct->cc_ptr, r0, r1, r2);
 
-			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4) ), r0);	//zpět zápis do paměti
+			jitStruct->cc_ptr->vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4) ), r0);	//zpět zápis do paměti
 
 		/*
 			double4 *v0i = v0.value(i);
@@ -327,7 +338,7 @@ struct EvalImpl<3, T> {
 
 template <class T>
 struct EvalImpl<4, T> {
-	inline static void eval(Operation op,  Workspace &w, JitStruct &jitStruct) {
+	inline static void eval(Operation op,  Workspace &w, JitStruct * jitStruct) {
 		/*
 		Vec v0 = w.vector[op.arg[0]];
 		Vec v1 = w.vector[op.arg[1]];
@@ -337,10 +348,10 @@ struct EvalImpl<4, T> {
 //		std::cout << "iv0:" << uint(op.arg[0])
 //				<< "iv1:" << uint(op.arg[1])
 //				<< "iv2:" << uint(op.arg[2]) << std::endl;
-		x86::Ymm r0 = jitStruct.cc.newYmm();
-		x86::Ymm r1 = jitStruct.cc.newYmm();
-		x86::Ymm r2 = jitStruct.cc.newYmm();
-		x86::Ymm r3 = jitStruct.cc.newYmm();
+		x86::Ymm r0 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r1 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r2 = jitStruct->cc_ptr->newYmm();
+		x86::Ymm r3 = jitStruct->cc_ptr->newYmm();
 
 		
 
@@ -357,13 +368,13 @@ struct EvalImpl<4, T> {
 			jitStruct.cc.vmovapd(r3, x86::ptr(jitStruct.valsPtr, offset3, sizeof(double4)));
 			// možná by šlo použít Immediate operand (imm((*v0i)[j]), že by se zachovaly původní, a jelikož to se dělá jednou, tak to možná bude efektivnější než tam vkládat několik instrukcí move). místo move s offsetem, ale jestli to funguje jak myslím.
 			*/
-			jitStruct.cc.vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
-			jitStruct.cc.vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
-			jitStruct.cc.vmovapd(r2, x86::ptr(w.get_ptr(op.arg[2],i), sizeof(double4)));
-			jitStruct.cc.vmovapd(r3, x86::ptr(w.get_ptr(op.arg[3],i), sizeof(double4)));
-			T::jit(jitStruct.cc_ptr, r0, r1, r2, r3);
+			jitStruct->cc_ptr->vmovapd(r0, x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4)));
+			jitStruct->cc_ptr->vmovapd(r1, x86::ptr(w.get_ptr(op.arg[1],i), sizeof(double4)));	
+			jitStruct->cc_ptr->vmovapd(r2, x86::ptr(w.get_ptr(op.arg[2],i), sizeof(double4)));
+			jitStruct->cc_ptr->vmovapd(r3, x86::ptr(w.get_ptr(op.arg[3],i), sizeof(double4)));
+			T::jit(jitStruct->cc_ptr, r0, r1, r2, r3);
 
-			jitStruct.cc.vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4) ), r0);
+			jitStruct->cc_ptr->vmovapd(x86::ptr(w.get_ptr(op.arg[0],i), sizeof(double4) ), r0);
 			/*
 			double4 *v0i = v0.value(i);
 			double4 *v1i = v1.value(i);
@@ -446,11 +457,11 @@ struct Processor {
 	Processor(ArenaAlloc arena, ExpressionDAG &se, uint vec_size)
 	: arena_(arena)
 	{
+		jitStruct = new JitStruct();
+    	jitStruct->code.init(jitStruct->runtime.environment());     	// Initialize code to match the JIT environment
+		jitStruct->code.attach(jitStruct->cc_ptr);						// attach x86::Compiler to code.
 
-    	jitStruct.code.init(jitGlobal.runtime.environment());     	// Initialize code to match the JIT environment.
-		jitStruct.code.attach(&jitStruct.cc);						// attach x86::Compiler to code.
-
-  		jitStruct.code.setLogger(&jitStruct.logger); 
+  		jitStruct->code.setLogger(&jitStruct->logger); 
 
 		workspace_.vector_size = vec_size;
 		workspace_.subset_size = 0;
@@ -532,6 +543,8 @@ struct Processor {
 	}
 
 	~Processor() {
+		//jitStruct.~JitStruct();
+		delete jitStruct;
 		arena_.destroy();
 	}
 	// jestli jsou ty operace seřazený třeba (operace arg1 arg2), tak je to na prd, ale kdyby byli (arg1 arg2 operace) tak si argumenty dáme na zásobník a vždy když narazíme na operaci tak vezmeme argumenty ze zásobníku a provedeme operaci a jen dáme výsledek zpět na zásobník. Takhle by se to dalo lehce předělal. aby tam nebylo hafo move instrukcí, který by to výrazně zpomalovali. 
@@ -553,12 +566,12 @@ struct Processor {
 	}
 	
 	FuncType _jit() {
-		jitStruct.cc.addFunc(FuncSignatureT<void, Vec*>());	// nejsme si jistej možná bude potřeba tomu dát že to bude mít jiný argumenty
-		jitStruct.cc.func()->frame().setAvxEnabled();
+		jitStruct->cc_ptr->addFunc(FuncSignatureT<void, Vec*>());	// nejsme si jistej možná bude potřeba tomu dát že to bude mít jiný argumenty
+		jitStruct->cc_ptr->func()->frame().setAvxEnabled();
 
 
-		jitStruct.valsPtr = jitStruct.cc.newIntPtr("valsPtr"); // "valsPrt" je název argumnetu který jde do funkce, kterou tenhle jit vytvoří
-		Error e = jitStruct.cc.setArg(0, jitStruct.valsPtr);
+		jitStruct->valsPtr = jitStruct->cc_ptr->newIntPtr("valsPtr"); // "valsPrt" je název argumnetu který jde do funkce, kterou tenhle jit vytvoří
+		Error e = jitStruct->cc_ptr->setArg(0, jitStruct->valsPtr);
 		for(Operation * op = program_;;++op) {
 			/*
 			std::cout << "op: " << (int)(op->code)
@@ -625,14 +638,14 @@ struct Processor {
 //			CODE(__);
 //			CODE(__);
 			case (ScalarNode::terminate_op_code): // terminal operation
-			 	e = jitStruct.cc.endFunc();
-				e = jitStruct.cc.finalize();
+			 	e = jitStruct->cc_ptr->endFunc();
+				e = jitStruct->cc_ptr->finalize();
 				FuncType func;
-				e = jitGlobal.runtime.add(&func, &jitStruct.code);
+				e = jitStruct->runtime.add(&func, &jitStruct->code);
 
 				FILE * flog = fopen("asmjit_log.txt", "w");
 				fprintf(flog, "Error: %d\n", e);
-				fprintf(flog, "Logger content: %s\n", jitStruct.logger.data());
+				fprintf(flog, "Logger content: %s\n", jitStruct->logger.data());
 				fclose(flog);
 
 				return (*func); 
@@ -653,7 +666,7 @@ struct Processor {
 
 	void release()
 	{
-		jitGlobal.runtime.release(fn);
+		jitStruct->runtime.release(fn);
 	}
 	// Set subset indices of active double4 blocks.
 	// TODO: Provide getter for pointer to the workspace subset in order to
@@ -674,7 +687,7 @@ struct Processor {
 	Workspace workspace_;
 	Operation * program_;
 
-	JitStruct jitStruct;
+	JitStruct * jitStruct;
 
 
 	FuncType fn;
