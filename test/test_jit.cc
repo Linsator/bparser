@@ -112,7 +112,7 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	auto end_time = std::chrono::high_resolution_clock::now();
 	double parser_time  =
 			std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time).count();
-	//p.release();
+
 	/*
 	for(int i = 0; i<3*1024; i++)
 	{
@@ -138,7 +138,7 @@ void test_expr_parser(std::string expr, std::string expr_id, std::ofstream& file
 	std::cout << "\n";
 
 	file << "BParser,"<< expr_id << "," << expr << "," << p_sum << "," << n_repeats << "," << parser_time << "," << parser_time/n_repeats/vec_size*1e9 << "," << n_flop/parser_time << "\n";
-   
+   	arena_1.destroy();
 }
 
 
@@ -164,10 +164,18 @@ void test_expressions(std::string filename, int n_repeats) {
 
 	std::cout << "Starting tests with BParser.\n";
 	
-	test_expr_parser("v1 * v2", "test2", file, n_repeats);
-	//test_expr_parser("v1 + v2", "test1", file, n_repeats);
-//	test_expr_parser("v1 + v2 + v3", "test3", file, n_repeats);
-	//test_expr_parser("v1 * v2 + v3 + v4", "test4", file, n_repeats);
+
+	//test_expr_parser("v1 * v2", "test2", file, n_repeats);
+	test_expr_parser("v1 + v2", "test2", file, n_repeats);
+
+
+
+	//test_expr_parser("v1 + v2 + v3 + v4", "test3", file, n_repeats);
+	//test_expr_parser("v1 * v2 * v3 * v4", "test4", file, n_repeats);
+	//test_expr_parser("3 * v1 * v1 * v2", "test4", file, n_repeats);
+	//test_expr_parser("3 * v1 + v1 * v2", "test4", file, n_repeats);
+	//test_expr_parser("cs1 * v1 + v1 * v2", "test4", file, n_repeats);
+	//est_expr_parser("cv1 * v3 + cv1 + v4", "test4", file, n_repeats);
 
 }
 
@@ -176,7 +184,7 @@ void test_expressions(std::string filename, int n_repeats) {
 int main(int argc, char * argv[])
 {
 	std::string soubor = "";
-	uint n_repeats = 1000;
+	uint n_repeats = 1000000;
 	if(argc > 1)
 	{
 		soubor = argv[1]; 
