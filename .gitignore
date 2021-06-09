@@ -48,3 +48,10 @@ include/boost
 test/test.png
 test/*.s
 test/*.html
+asmjit_log.txt
+mfile
+nm_test_jit.txt
+nmtest.txt
+old_Makefile
+valgrind_log.txt
+valgrind_log2.txt
